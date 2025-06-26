@@ -11,7 +11,7 @@ import SystemSettings from '../views/SystemSettings.vue';
 const routes = [
   {
     path: '/',
-    redirect: '/login' // 默认打开应用时，重定向到登录页
+    redirect: '/login'
   },
   {
     path: '/login',
@@ -20,17 +20,13 @@ const routes = [
   },
   {
     path: '/dashboard',
-    name: 'Dashboard',
-    component: DashboardView,
-    // 这里是“子路由”，所有在仪表盘内部切换的页面都在这里定义
+    component: DashboardView, // 父路由只负责布局，不需要 name
+    redirect: '/dashboard/home', // 进入 /dashboard 时，自动跳转到 /dashboard/home
     children: [
+      // 子路由负责具体页面
       {
-        path: '', // /dashboard 的默认子页面
-        redirect: '/dashboard/home'
-      },
-      {
-        path: 'home', // 对应的完整路径是 /dashboard/home
-        name: 'Home',
+        path: 'home',
+        name: 'DashboardHome', // 给首页一个明确的名字
         component: HomeView
       },
       {
