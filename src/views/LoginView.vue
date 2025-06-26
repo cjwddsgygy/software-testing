@@ -40,7 +40,7 @@ const handleLogin = async () => {
   try {
     // 调用后端的 /admins/login 接口，使用POST方法
     const response = await apiClient.post('/admins/login', {
-      username: form.username,
+      username: form.account,
       password: form.password
     });
 
