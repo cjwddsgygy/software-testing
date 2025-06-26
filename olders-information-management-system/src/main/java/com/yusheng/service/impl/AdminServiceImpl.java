@@ -17,7 +17,7 @@ public class AdminServiceImpl implements AdminService {
     @Autowired
     private AdminMapper adminMapper;
 
-//    管理员登录
+    //    管理员登录
     @Override
     public AdminInfo login(Admin admin) {
 //        1.调用mapper接口，根据用户名和密码查询管理员信息

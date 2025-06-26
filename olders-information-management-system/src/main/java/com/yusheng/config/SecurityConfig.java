@@ -1,16 +1,14 @@
-// File: src/main/java/com/yusheng/config/SecurityConfig.java
-// This code is compatible with Spring Boot 2.7.x / Spring Security 5.x
-
 package com.yusheng.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -19,23 +17,26 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig {
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        // 1. 应用我们自定义的CORS配置
-        http.cors()
-                .and()
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                // 1. 应用我们自定义的CORS配置
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 // 2. 关闭CSRF防护
-                .csrf().disable()
+                .csrf(csrf -> csrf.disable())
                 // 3. 配置请求授权规则
-                .authorizeRequests()
-                // 明确放行所有OPTIONS预检请求
-                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                // 明确放行登录接口
-                .antMatchers("/admins/login").permitAll()
-                // 其他所有请求都需要身份验证
-                .anyRequest().authenticated();
+                .authorizeHttpRequests(authorize -> authorize
+                        // 明确放行所有OPTIONS预检请求
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // 明确放行登录接口
+                        .requestMatchers("/admins/login").permitAll()
+                        // 其他所有请求都需要身份验证
+                        .anyRequest().authenticated()
+                );
+
+        return http.build();
     }
 
     @Bean
