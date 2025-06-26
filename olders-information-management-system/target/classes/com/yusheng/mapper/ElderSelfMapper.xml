@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yusheng.mapper.ElderSelfMapper">
+
+<!--    根据ID查询老人信息-->
+    <select id="getById" resultType="com.yusheng.pojo.Elder">
+        select id,
+               name,
+               age,
+               birth_date,
+               ethnicity,
+               account,
+               password,
+               education,
+               marital_status,
+               hobbies,
+               care_level,
+               medical_care,
+               fee_type,
+               expenses,
+               relative_contact,
+               bed_number,
+               check_in_date,
+               check_out_date,
+               created_at,
+               updated_at
+        from elders
+        where id = #{id}
+    </select>
+
+    <!--    修改老人-->
+    <update id="updateById">
+        update elders
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="birthDate != null">birth_date = #{birthDate},</if>
+            <if test="ethnicity != null and ethnicity != ''">ethnicity = #{ethnicity},</if>
+            <if test="account != null and account != ''">account = #{account},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="education != null and education != ''">education = #{education},</if>
+            <if test="maritalStatus != null and maritalStatus != ''">
+                marital_status = #{maritalStatus},</if>
+            <if test="hobbies != null and hobbies != ''">hobbies = #{hobbies},</if>
+            <if test="careLevel != null and careLevel != ''">care_level = #{careLevel},</if>
+            <if test="medicalCare != null and medicalCare != ''">
+                medical_care = #{medicalCare},</if>
+            <if test="feeType != null and feeType != ''">fee_type = #{feeType},</if>
+            <if test="expenses != null">expenses = #{expenses},</if>
+            <if test="relativeContact != null and relativeContact != ''">
+                relative_contact = #{relativeContact},</if>
+            <if test="bedNumber != null and bedNumber != ''">bed_number = #{bedNumber},</if>
+            <if test="checkInDate != null">check_in_date = #{checkInDate},</if>
+            <if test="checkOutDate != null">check_out_date = #{checkOutDate},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+<!--    老人登录-->
+    <select id="selectByUsernameAndPassword" resultType="com.yusheng.pojo.Elder">
+        select id, name, account from elders where account = #{account} and password = #{password}
+    </select>
+</mapper>

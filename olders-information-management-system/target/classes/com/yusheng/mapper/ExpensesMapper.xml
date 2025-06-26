@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yusheng.mapper.ExpensesMapper">
+
+<!--    查询全部费用数据-->
+    <select id="findAll" resultType="com.yusheng.pojo.Expense">
+        select id, elder, item_name, amount, remark, expense_date, created_at, updated_at
+        from expenses
+        order by updated_at desc
+    </select>
+
+<!--    删除费用-->
+    <delete id="deleteById">
+        delete from expenses where id = #{id}
+    </delete>
+
+<!--    新增费用-->
+    <insert id="save">
+        insert into expenses(elder, item_name, amount, remark, expense_date, created_at, updated_at)
+        values (#{elder}, #{itemName}, #{amount}, #{remark},
+                #{expenseDate}, #{createdAt}, #{updatedAt})
+    </insert>
+
+<!--    根据ID查询费用信息-->
+    <select id="getById" resultType="com.yusheng.pojo.Expense">
+        select id, elder, item_name, amount, remark, expense_date, created_at, updated_at
+        from expenses
+        where id = #{id}
+    </select>
+
+<!--    修改费用-->
+    <update id="updateById">
+        update expenses
+        <set>
+            <if test="elder != null and elder != ''">elder = #{elder},</if>
+            <if test="itemName != null and itemName != ''">item_name = #{itemName},</if>
+            <if test="amount != null and amount != ''">amount = #{amount},</if>
+            <if test="remark != null and remark != ''">remark = #{remark},</if>
+            <if test="expenseDate != null">expense_date = #{expenseDate},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt}</if>
+        </set>
+        where id = #{id}
+    </update>
+</mapper>

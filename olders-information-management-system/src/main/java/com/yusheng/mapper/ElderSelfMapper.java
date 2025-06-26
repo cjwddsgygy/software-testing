@@ -1,0 +1,17 @@
+package com.yusheng.mapper;
+
+import com.yusheng.pojo.Elder;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface ElderSelfMapper {
+
+//    根据ID查询老人信息
+    Elder getById(Integer id);
+
+//    修改老人
+    void updateById(Elder elder);
+
+//    老人登录
+    Elder selectByUsernameAndPassword(Elder elder);
+}
