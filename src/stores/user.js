@@ -1,7 +1,7 @@
 // src/stores/user.js
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { loginAPI } from '@/api/user';
+import { loginAPI } from '@/api/admin';
 
 export const useUserStore = defineStore('user', () => {
     // 定义 token
