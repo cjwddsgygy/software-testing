@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Elder {
-    private Integer eldersid;
+    private Integer id;
     private String name;
     private Integer age;
     private String birthDate; // 可改为 LocalDate

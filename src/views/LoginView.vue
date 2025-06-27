@@ -49,8 +49,8 @@ const handleLogin = async () => {
 
     console.log('后端登录响应:', response.data);
 
-    // 判断登录是否成功 (code === 1)
-    if (response.data.code === 1) {
+    // 判断登录是否成功 (code === 0)
+    if (response.data.code === 0) {
       
       // --- 关键修改 3: 保存 Token ---
       const token = response.data.data.token;

@@ -15,16 +15,33 @@ public class ElderController {
     @Autowired
     private ElderService elderService;
 
-    //    查询全部老人数据
+    //    动态查询老人数据
     @GetMapping
-    public Result list(String name) { // ✅ 增加 String name 参数
-        List<Elder> elderList = elderService.findAll(name); // ✅ 调用 service 的新方法
+    public Result<List<Elder>> list(@RequestParam(required = false) String searchTerm) {
+        Integer id = null;
+        String name = null;
+
+        // 判断 searchTerm 是否不为空
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            // 尝试将 searchTerm 转换为数字
+            try {
+                id = Integer.parseInt(searchTerm);
+                // 如果成功转换为数字，我们就认为用户想按 ID 搜索
+                // 为了避免意外地也按名字搜索，将 name 保持为 null
+            } catch (NumberFormatException e) {
+                // 如果转换失败（说明不是纯数字），我们就认为用户想按姓名搜索
+                name = searchTerm;
+            }
+        }
+
+        // 调用 Service，此时 id 和 name 最多只有一个有值
+        List<Elder> elderList = elderService.findElders(id, name);
         return Result.success(elderList);
     }
 
     //    删除老人
-    @DeleteMapping
-    public Result delete(Integer id) {
+    @DeleteMapping("/{id}") // <<--- 新的、更推荐的写法
+    public Result delete(@PathVariable Integer id) { // <<--- 使用 @PathVariable
         elderService.deleteById(id);
         return Result.success();
     }

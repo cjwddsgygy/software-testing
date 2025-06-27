@@ -3,9 +3,10 @@
   <div class="Elder-View">
     <h2 class="view-title">老人信息管理</h2>
 
-    <!-- Toolbar: 搜索和新增按钮 -->
+    <!-- Toolbar: 统一搜索框和新增按钮 -->
     <div class="toolbar">
-      <input type="text" v-model="searchParams.name" @keyup.enter="fetchElders" placeholder="按姓名搜索..." class="search-input" />
+      <!-- 关键修改: v-model 绑定到 searchParams.searchTerm -->
+      <input type="text" v-model="searchParams.searchTerm" @keyup.enter="fetchElders" placeholder="按姓名或ID搜索..." class="search-input" />
       <button @click="fetchElders" class="btn btn-primary">搜索</button>
       <button @click="openModal()" class="btn btn-success">新增老人</button>
     </div>
@@ -28,8 +29,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="elder in elders" :key="elder.eldersid">
-            <td>{{ elder.eldersid }}</td>
+          <!-- 注意: :key 应该使用唯一的ID, 比如 edler.id -->
+          <tr v-for="elder in elders" :key="elder.id">
+            <td>{{ elder.id }}</td>
             <td>{{ elder.name }}</td>
             <td>{{ elder.account }}</td>
             <td>{{ elder.age }}</td>
@@ -38,10 +40,9 @@
             <td>{{ elder.relativeContact }}</td>
             <td>{{ formatDisplayDate(elder.checkInDate) }}</td>
             <td>
-              <!-- ✅ 1. 新增“详情”按钮 -->
               <button @click="openDetailModal(elder)" class="btn-action detail">详情</button>
               <button @click="openModal(elder)" class="btn-action edit">编辑</button>
-              <button @click="handleDelete(elder.eldersid)" class="btn-action delete">删除</button>
+              <button @click="handleDelete(elder.id)" class="btn-action delete">删除</button>
             </td>
           </tr>
           <tr v-if="!elders || elders.length === 0">
@@ -51,7 +52,7 @@
       </table>
     </div>
 
-    <!-- 新增/编辑弹窗 (保持原样) -->
+    <!-- 新增/编辑弹窗 -->
     <div v-if="isModalVisible" class="modal-overlay" @click="closeModal">
       <div class="modal-content" @click.stop>
         <h3>{{ isEditing ? '编辑老人信息' : '新增老人' }}</h3>
@@ -71,12 +72,12 @@
       </div>
     </div>
 
-    <!-- ✅ 2. 新增一个独立的“详情”弹窗 -->
+    <!-- 详情弹窗 -->
     <div v-if="isDetailModalVisible" class="modal-overlay" @click="closeDetailModal">
       <div class="modal-content detail-modal" @click.stop>
         <h3>老人详细信息</h3>
         <div v-if="detailElder" class="detail-grid">
-          <div class="detail-item"><strong>ID:</strong><span>{{ detailElder.eldersid }}</span></div>
+          <div class="detail-item"><strong>ID:</strong><span>{{ detailElder.id }}</span></div>
           <div class="detail-item"><strong>姓名:</strong><span>{{ detailElder.name }}</span></div>
           <div class="detail-item"><strong>账户名:</strong><span>{{ detailElder.account }}</span></div>
           <div class="detail-item"><strong>年龄:</strong><span>{{ detailElder.age }}</span></div>
@@ -106,33 +107,39 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue';
-import { ElMessage } from 'element-plus'; // 假设你已安装并配置Element Plus
-import request from '@/api/request';
+import { ref, reactive, onMounted } from 'vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import apiClient from '@/api'; // 确保这是你配置好的 Axios 实例
 
-// --- 响应式状态 (编辑弹窗) ---
+// --- 响应式状态 ---
 const elders = ref([]);
 const loading = ref(true);
-const searchParams = reactive({ name: '' });
-const isModalVisible = ref(false); // 这是新增/编辑弹窗的开关
+
+// 关键修改: 使用统一的 searchTerm
+const searchParams = reactive({
+  searchTerm: ''
+});
+
+// 新增/编辑弹窗状态
+const isModalVisible = ref(false);
 const currentElder = ref({});
-const isEditing = computed(() => !!currentElder.value.id);
-const defaultElder = {
-  id: null, name: '', account: '', age: null, bedNumber: '',
-  careLevel: '三级护理', relativeContact: '', checkInDate: new Date().toISOString().split('T')[0]
-};
+const isEditing = ref(false);
 
-// ✅ 3. 新增用于“详情”弹窗的状态
-const isDetailModalVisible = ref(false); // 这是详情弹窗的开关
-const detailElder = ref(null); // 用于存放要显示详情的老人数据
-
+// 详情弹窗状态
+const isDetailModalVisible = ref(false);
+const detailElder = ref(null);
 
 // --- API 调用函数 ---
 const fetchElders = async () => {
   loading.value = true;
   try {
-    const response = await request.get('/elders', { params: searchParams });
-    if (response.data.code === 1) {
+    const response = await apiClient.get('/elders', {
+      params: { // 只发送 searchTerm
+        searchTerm: searchParams.searchTerm 
+      }
+    });
+    
+    if (response.data.code === 0) {
       elders.value = response.data.data;
     } else {
       throw new Error(response.data.msg || '获取数据失败');
@@ -144,47 +151,66 @@ const fetchElders = async () => {
   }
 };
 
-// --- 保存和删除逻辑 (保持原样) ---
 const handleSave = async () => {
   try {
-    const apiCall = isEditing.value 
-      ? request.put('/elders', currentElder.value)
-      : request.post('/elders', currentElder.value);
-    await apiCall;
-    ElMessage.success(isEditing.value ? '更新成功！' : '新增成功！');
+    if (isEditing.value) {
+      await apiClient.put('/elders', currentElder.value);
+      ElMessage.success('老人信息更新成功！');
+    } else {
+      await apiClient.post('/elders', currentElder.value);
+      ElMessage.success('新增老人成功！');
+    }
     closeModal();
     await fetchElders();
   } catch (error) {
-    ElMessage.error('操作失败');
+    ElMessage.error(error.response?.data?.msg || '操作失败，请检查输入');
   }
 };
 
 const handleDelete = async (id) => {
-  if (!confirm('确定要删除这位老人的信息吗?')) return;
   try {
-    await request.delete(`/elders/${id}`);
+    await ElMessageBox.confirm('您确定要删除这位老人的信息吗?', '警告', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    });
+    
+    // 使用RESTful风格的DELETE请求
+    await apiClient.delete(`/elders/${id}`);
+
     ElMessage.success('删除成功！');
     await fetchElders();
   } catch (error) {
-    ElMessage.error('删除失败');
+    if (error !== 'cancel') {
+      ElMessage.error(error.response?.data?.msg || '删除操作失败');
+    }
   }
 };
 
-// --- 新增/编辑弹窗控制 (保持原样) ---
+// --- 弹窗控制 ---
 const openModal = (elder = null) => {
   if (elder) {
-    currentElder.value = { ...elder, checkInDate: elder.checkInDate ? elder.checkInDate.split('T')[0] : '' };
+    isEditing.value = true;
+    currentElder.value = { 
+      ...elder, 
+      checkInDate: elder.checkInDate ? elder.checkInDate.split('T')[0] : ''
+    };
   } else {
-    currentElder.value = { ...defaultElder };
+    isEditing.value = false;
+    currentElder.value = {
+        name: '', account: '', age: null, bedNumber: '',
+        careLevel: '三级护理', relativeContact: '', 
+        checkInDate: new Date().toISOString().split('T')[0]
+    };
   }
   isModalVisible.value = true;
 };
 
 const closeModal = () => {
   isModalVisible.value = false;
+  currentElder.value = {};
 };
 
-// ✅ 4. 新增“详情”弹窗的控制函数
 const openDetailModal = (elder) => {
   detailElder.value = elder;
   isDetailModalVisible.value = true;
@@ -196,23 +222,28 @@ const closeDetailModal = () => {
 };
 
 // --- 工具函数 ---
-// ✅ 5. 增强日期格式化函数，使其能处理时间和日期
 const formatDisplayDate = (dateString, showTime = false) => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return dateString; 
-  
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
-  
-  if (showTime) {
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const seconds = date.getSeconds().toString().padStart(2, '0');
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  }
-  return `${year}-${month}-${day}`;
+    if (!dateString) return '';
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return dateString; 
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const datePart = `${year}-${month}-${day}`;
+
+        if (showTime) {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            const timePart = `${hours}:${minutes}:${seconds}`;
+            return `${datePart} ${timePart}`;
+        }
+        return datePart;
+    } catch (e) {
+        return dateString;
+    }
 };
 
 // --- 生命周期钩子 ---
@@ -220,17 +251,17 @@ onMounted(fetchElders);
 </script>
 
 <style scoped>
-/* ✅ 6. 新增和调整样式 */
-.btn-action.detail { color: #409eff; } /* 详情按钮颜色 */
+/* 详情按钮颜色 */
+.btn-action.detail { color: #409eff; }
 
 .detail-modal {
-  width: 800px; /* 详情弹窗更宽 */
+  width: 800px;
   max-width: 95%;
 }
 
 .detail-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 两列网格布局 */
+  grid-template-columns: repeat(2, 1fr);
   gap: 15px 25px;
   text-align: left;
 }
@@ -255,16 +286,16 @@ onMounted(fetchElders);
 }
 
 .detail-item.full-width {
-  grid-column: 1 / -1; /* 占满整行 */
+  grid-column: 1 / -1;
 }
 
-
-/* --- 以下是你原有的样式，保持不变 --- */
+/* --- 以下是通用样式 --- */
+.Elder-View { padding: 20px; }
 .view-title { font-size: 24px; margin-bottom: 20px; color: #333; }
 .loading-text, .empty-text { font-size: 16px; color: #888; text-align: center; padding: 40px; }
 .toolbar { display: flex; gap: 10px; margin-bottom: 20px; }
 .search-input { padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; flex-grow: 1; max-width: 300px; }
-.btn { padding: 8px 15px; border: none; border-radius: 4px; color: #fff; cursor: pointer; }
+.btn { padding: 8px 15px; border: none; border-radius: 4px; color: #fff; cursor: pointer; transition: background-color 0.3s; }
 .btn-primary { background-color: #409eff; }
 .btn-success { background-color: #67c23a; }
 .btn-secondary { background-color: #909399; }
@@ -272,7 +303,8 @@ onMounted(fetchElders);
 table { width: 100%; border-collapse: collapse; }
 th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eef1f6; }
 th { background-color: #fafafa; font-weight: bold; color: #666; }
-.btn-action { background: none; border: none; cursor: pointer; padding: 5px 8px; margin-right: 5px; }
+.btn-action { background: none; border: none; cursor: pointer; padding: 5px 8px; margin-right: 5px; font-size: 14px; }
+.btn-action:hover { opacity: 0.7; }
 .btn-action.edit { color: #e6a23c; }
 .btn-action.delete { color: #f56c6c; }
 

@@ -16,13 +16,13 @@ public class ElderServiceImpl implements ElderService {
     public ElderMapper elderMapper;
 
 //    查询全部老人数据
-    @Override
-    public List<Elder> findAll(String name) {
-        return elderMapper.findAll(name);
-    }
+@Override
+public List<Elder> findElders(Integer id, String name) {
+    return elderMapper.findElders(id, name);
+}
 
 
-//    删除老人
+    //    删除老人
     @Override
     public void deleteById(Integer id) {
         elderMapper.deleteById(id);

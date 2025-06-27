@@ -7,7 +7,7 @@ import java.util.List;
 public interface ElderService {
 
     //    查询全部老人数据
-    List<Elder> findAll(String name);
+    List<Elder> findElders(Integer id, String name);
 
     //    删除老人
     void deleteById(Integer id);
@@ -22,4 +22,5 @@ public interface ElderService {
     void update(Elder elder);
 
     List<Elder> findUnassigned();
+
 }
