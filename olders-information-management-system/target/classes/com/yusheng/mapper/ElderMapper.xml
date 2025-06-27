@@ -2,7 +2,20 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="com.yusheng.mapper.ElderMapper">
+
+    <resultMap id="ElderResultMap" type="com.yusheng.pojo.Elder">
+        <!-- ✅ 关键：明确指定主键列和属性的映射关系 -->
+        <id property="id" column="elders_id" />
+
+        <!-- 其他所有字段，如果开启了驼峰转换，它们会自动映射。如果没有，就需要全部列出来 -->
+        <result property="name" column="name"/>
+        <result property="age" column="age"/>
+        <result property="birthDate" column="birth_date"/>
+        <result property="careLevel" column="care_level"/>
+        <!-- ... 把所有下划线的字段都在这里列一遍 ... -->
+    </resultMap>
 
 <!--    查询全部老人数据-->
     <select id="findAll" resultType="com.yusheng.pojo.Elder">

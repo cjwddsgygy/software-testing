@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 public interface ElderSelfMapper {
 
 //    根据ID查询老人信息
-    Elder getById(Integer id);
+    Elder getById(Integer Id);
 
 //    修改老人
     void updateById(Elder elder);

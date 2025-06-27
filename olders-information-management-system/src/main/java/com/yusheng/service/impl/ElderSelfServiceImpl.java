@@ -38,11 +38,11 @@ public class ElderSelfServiceImpl implements ElderSelfService {
         if (elderInfo != null) {
 //            生成JWT令牌
             Map<String, Object> payload = new HashMap<>();
-            payload.put("id", elderInfo.getId());
+            payload.put("id", elderInfo.getEldersid());
             payload.put("account", elderInfo.getAccount());
             String jwt = JwtUtils.generateToken(payload);
 
-            return new ElderInfo(elderInfo.getId(), elderInfo.getName()
+            return new ElderInfo(elderInfo.getEldersid(), elderInfo.getName()
                     , elderInfo.getAccount(), jwt);
         }
         return null;
