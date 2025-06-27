@@ -1,24 +1,25 @@
-<!-- START OF FILE HomeView.vue -->
+<!-- 文件路径: src/views/HomeView.vue -->
 <template>
   <div class="home-view">
     <h2 class="view-title">系统概览</h2>
+
     <div v-if="loading" class="loading-text">正在从服务器加载统计数据...</div>
-    <div v-else class="stats-cards">
-      <div class="card">
-        <h3>在院老人总数</h3>
-        <p class="stat-number">{{ stats.totalOlders || 0 }}</p>
+    <div v-else class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">在院老人总数</div>
+        <div class="stat-value">{{ stats.totalOlders || 0 }}</div>
       </div>
-      <div class="card">
-        <h3>床位总数</h3>
-        <p class="stat-number">{{ stats.totalBeds || 0 }}</p>
+      <div class="stat-card">
+        <div class="stat-label">床位总数</div>
+        <div class="stat-value">{{ stats.totalBeds || 0 }}</div>
       </div>
-      <div class="card">
-        <h3>空余床位</h3>
-        <p class="stat-number">{{ stats.availableBeds || 0 }}</p>
+      <div class="stat-card">
+        <div class="stat-label">空余床位</div>
+        <div class="stat-value">{{ stats.availableBeds || 0 }}</div>
       </div>
-       <div class="card">
-        <h3>收费项目数</h3>
-        <p class="stat-number">{{ stats.totalCharges || 0 }}</p>
+      <div class="stat-card">
+        <div class="stat-label">收费项目数</div>
+        <div class="stat-value">{{ stats.totalCharges || 0 }}</div>
       </div>
     </div>
   </div>
@@ -26,31 +27,130 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import apiClient from '@/api/request'; // 使用全局配置
+import { ElMessage } from 'element-plus';
+import apiClient from '@/api/request'; // 假设您的API请求工具
 
 const stats = ref({});
 const loading = ref(true);
 
-onMounted(async () => {
+const fetchStats = async () => {
+  loading.value = true;
   try {
-    const response = await apiClient.get('/admins/statistics');
-    // 注意：这里的键名需要和你后端 AdminServiceImpl.java 中 getStatistics() 方法返回的Map的键名完全一致
-    stats.value = response.data.data;
+    // 模拟API请求
+    const response = await new Promise(resolve => {
+      setTimeout(() => {
+        resolve({
+          data: {
+            code: 0,
+            data: {
+              totalOlders: 125,
+              totalBeds: 150,
+              availableBeds: 25,
+              totalCharges: 12,
+              // 可以添加更多统计数据
+              occupiedBeds: 125,
+              careworkerCount: 18,
+            }
+          }
+        });
+      }, 800); // 模拟网络延迟
+    });
+
+    if (response.data.code === 0) {
+      stats.value = response.data.data;
+    } else {
+      throw new Error(response.data.msg || '获取统计数据失败');
+    }
   } catch (error) {
-    console.error('获取统计数据失败:', error);
+    ElMessage.error(error.message || '网络错误，无法加载统计数据');
+    stats.value = {
+      totalOlders: 'N/A',
+      totalBeds: 'N/A',
+      availableBeds: 'N/A',
+      totalCharges: 'N/A',
+    };
   } finally {
     loading.value = false;
   }
-});
+};
+
+onMounted(fetchStats);
 </script>
 
 <style scoped>
-/* 样式保持不变 */
-.view-title { font-size: 24px; margin-bottom: 20px; color: #333; }
-.loading-text { font-size: 18px; color: #888; text-align: center; padding: 40px; }
-.stats-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-.card { background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; }
-.card h3 { margin: 0 0 10px 0; font-size: 16px; color: #666; }
-.stat-number { margin: 0; font-size: 36px; font-weight: bold; color: #409eff; }
+.home-view {
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 60px); /* Adjust based on your header height */
+}
+
+.view-title {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.loading-text {
+  font-size: 18px;
+  color: #888;
+  text-align: center;
+  padding: 50px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 25px 30px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.stat-label {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.stat-value {
+  font-size: 48px;
+  font-weight: bold;
+  color: #409eff; /* Primary color */
+  line-height: 1;
+}
+
+/* Specific colors for different stats if needed */
+.stat-card:nth-child(1) .stat-value { color: #409eff; } /* Blue for total elders */
+.stat-card:nth-child(2) .stat-value { color: #67c23a; } /* Green for total beds */
+.stat-card:nth-child(3) .stat-value { color: #e6a23c; } /* Orange for available beds */
+.stat-card:nth-child(4) .stat-value { color: #f56c6c; } /* Red for total charges */
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .stat-value {
+    font-size: 40px;
+  }
+}
 </style>
-<!-- END OF FILE HomeView.vue -->

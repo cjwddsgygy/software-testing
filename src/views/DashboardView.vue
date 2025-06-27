@@ -1,30 +1,22 @@
-<!-- START OF FILE DashboardView.vue -->
+<!-- 文件路径: src/views/DashboardView.vue -->
 <template>
-  <div class="dashboard-layout">
-    <!-- Sidebar -->
+  <div class="dashboard-view">
     <aside class="sidebar">
-      <div class="sidebar-header">
-        <h2>管理系统</h2>
-      </div>
-      <nav class="sidebar-nav">
+      <h1 class="system-title">管理系统</h1>
+      <nav class="nav-menu">
         <ul>
-          <!-- 使用 <router-link> 进行导航 -->
-          <li><router-link to="/dashboard/home" class="nav-link">首页</router-link></li>
-		  <li><router-link to="/dashboard/care-worker" class="nav-link">护工信息管理</router-link></li>
-          <li><router-link to="/dashboard/elder" class="nav-link">老人信息管理</router-link></li>
-          <li><router-link to="/dashboard/bed-management" class="nav-link">床位管理</router-link></li>
-          <li><router-link to="/dashboard/system-settings" class="nav-link">系统设置</router-link></li>
+          <li><router-link to="/dashboard/home">首页</router-link></li>
+          <li><router-link to="/dashboard/careworkers">护工信息管理</router-link></li>
+          <li><router-link to="/dashboard/elders">老人信息管理</router-link></li>
+          <li><router-link to="/dashboard/beds">床位管理</router-link></li>
+          <li><router-link to="/dashboard/expenses">消费记录管理</router-link></li> <!-- 新增 -->
+          <li><router-link to="/dashboard/health-records">健康管理</router-link></li> <!-- 新增 -->
+          <li><router-link to="/dashboard/settings">系统设置</router-link></li>
         </ul>
       </nav>
-      <div class="sidebar-footer">
-        <!-- 添加点击事件处理退出登录 -->
-        <a href="#" @click.prevent="handleLogout" class="nav-link logout">退出登录</a>
-      </div>
+      <button @click="logout" class="logout-btn">退出登录</button>
     </aside>
-
-    <!-- Main Content Area -->
     <main class="main-content">
-      <!-- 子路由对应的组件将在这里被渲染 -->
       <router-view />
     </main>
   </div>
@@ -32,36 +24,95 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth'; // ✅ 1. 导入你的 auth store
+import { ElMessage } from 'element-plus'; // 假设需要Element Plus的提示
 
 const router = useRouter();
-const authStore = useAuthStore(); // ✅ 2. 获取 store 实例
 
-const handleLogout = () => {
+const logout = () => {
+  // 模拟退出登录逻辑
   console.log('用户退出登录');
-  
-  // ✅ 3. 调用 store 的 logout action
-  // 它会自动清除 token, user, localStorage 和 Axios 头部
-  authStore.logout();
-  
-  // 4. 跳转回登录页
-  router.push('/login');
+  ElMessage.success('您已成功退出登录！');
+  // 实际项目中可能需要清除token，并重定向到登录页
+  localStorage.removeItem('token'); // 清除token
+  router.push('/login'); // 跳转到登录页
 };
 </script>
 
 <style scoped>
-.dashboard-layout { display: flex; height: 100vh; width: 100vw; background-color: #f5f7fa; }
-.sidebar { width: 220px; background-color: #304156; color: #bfcbd9; display: flex; flex-direction: column; flex-shrink: 0; position: fixed; top: 0; left: 0; height: 100%; }
-.sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid #4a5e73; }
-.sidebar-header h2 { margin: 0; font-size: 20px; color: #ffffff; }
-.sidebar-nav { flex-grow: 1; overflow-y: auto; }
-.sidebar-nav ul { list-style: none; padding: 0; margin: 20px 0; }
-.nav-link { display: block; padding: 15px 20px; color: #bfcbd9; text-decoration: none; transition: background-color 0.3s, color 0.3s; }
-.nav-link:hover { background-color: #263445; }
-/* Vue Router 会自动为当前激活的链接添加 'router-link-active' 和 'router-link-exact-active' class */
-.nav-link.router-link-active { background-color: #409eff; color: #ffffff; }
-.sidebar-footer { padding: 15px; border-top: 1px solid #4a5e73; }
-.logout { text-align: center; }
-.main-content { flex-grow: 1; padding: 30px; overflow-y: auto; margin-left: 220px; }
+.dashboard-view {
+  display: flex;
+  height: 100vh;
+  background-color: #f0f2f5;
+}
+
+.sidebar {
+  width: 250px;
+  background-color: #2c3e50; /* 深色背景 */
+  color: #ecf0f1; /* 浅色文字 */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+}
+
+.system-title {
+  font-size: 28px;
+  text-align: center;
+  margin-bottom: 30px;
+  color: #42b983; /* Vue 绿色 */
+  font-weight: bold;
+}
+
+.nav-menu {
+  flex-grow: 1;
+}
+
+.nav-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-menu li {
+  margin-bottom: 10px;
+}
+
+.nav-menu a {
+  display: block;
+  padding: 12px 15px;
+  color: #ecf0f1;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background-color 0.3s, color 0.3s;
+  font-size: 16px;
+}
+
+.nav-menu a:hover,
+.nav-menu a.router-link-active {
+  background-color: #42b983; /* Vue 绿色 */
+  color: #fff;
+}
+
+.logout-btn {
+  background-color: #e74c3c; /* 红色 */
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.logout-btn:hover {
+  background-color: #c0392b;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 20px;
+  overflow-y: auto; /* Allow scrolling for content */
+}
 </style>
-<!-- END OF FILE DashboardView.vue -->

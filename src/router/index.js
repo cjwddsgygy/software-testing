@@ -8,7 +8,11 @@ import LoginView from '../views/LoginView.vue';
 import DashboardView from '../views/DashboardView.vue';
 import HomeView from '../views/HomeView.vue';
 import ElderView from '../views/ElderView.vue';
-// ... 导入其他视图组件，例如 CareWorkerView, BedManagementView 等
+import CareWorkerView from '../views/CareWorkerView.vue';
+import BedManagement from '../views/BedManagement.vue';
+import SystemSettings from '../views/SystemSettings.vue';
+import ExpansesView from '../views/ExpansesView.vue'; 
+import HealthRecordView from '../views/HealthRecordView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -36,28 +40,43 @@ const router = createRouter({
           component: HomeView
         },
         {
-          path: 'elder',
+          path: 'elders', // 建议保持与 DashboardView 中的链接一致，将 'elder' 改为 'elders'
           name: 'ElderManagement',
           component: ElderView
         },
-        // 在这里添加其他子路由的定义
-        // {
-        //   path: 'care-worker',
-        //   name: 'CareWorkerManagement',
-        //   component: CareWorkerView
-        // },
-        // {
-        //   path: 'bed-management',
-        //   name: 'BedManagement',
-        //   component: BedManagementView
-        // }
+        // ✅ 在这里添加其他子路由的定义
+        {
+          path: 'careworkers', // 保持与 DashboardView 中的链接一致
+          name: 'CareWorkerManagement',
+          component: CareWorkerView
+        },
+        {
+          path: 'beds', // 保持与 DashboardView 中的链接一致，将 'bed-management' 改为 'beds'
+          name: 'BedManagement',
+          component: BedManagement
+        },
+        {
+          path: 'expenses', // ✅ 新增消费记录管理路由
+          name: 'ExpensesManagement',
+          component: ExpansesView
+        },
+        {
+          path: 'health-records', // ✅ 新增健康管理路由
+          name: 'HealthRecordManagement',
+          component: HealthRecordView
+        },
+        {
+          path: 'settings', // 确保系统设置路由也在这里
+          name: 'SystemSettings',
+          component: SystemSettings
+        },
       ]
     },
     // (可选) 添加一个 404 页面
     // { 
     //   path: '/:pathMatch(.*)*', 
     //   name: 'NotFound', 
-    //   component: NotFoundView 
+    //   component: () => import('../views/NotFoundView.vue') // 假设您有一个 NotFoundView
     // }
   ]
 });

@@ -6,7 +6,7 @@ import router from '@/router'; // 导入 router 用于跳转
 
 // 创建 axios 实例
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: 'http://localhost:8080', // 确保这是您的后端API地址
   timeout: 10000,
 });
 

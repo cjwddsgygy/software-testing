@@ -1,47 +1,46 @@
-<!-- 文件路径: src/views/CareWorkerView.vue -->
+<!-- 文件路径: src/views/ExpansesView.vue -->
 <template>
-  <div class="CareWorker-View">
-    <h2 class="view-title">护工信息管理</h2>
+  <div class="Expenses-View">
+    <h2 class="view-title">消费记录管理</h2>
 
     <!-- Toolbar: 统一搜索框和新增按钮 -->
     <div class="toolbar">
-      <input type="text" v-model="searchParams.searchTerm" @keyup.enter="fetchCareworkers" placeholder="按姓名或ID搜索..." class="search-input" />
-      <button @click="fetchCareworkers" class="btn btn-primary">搜索</button>
-      <button @click="openModal()" class="btn btn-success">新增护工</button>
+      <input type="text" v-model="searchParams.searchTerm" @keyup.enter="fetchExpenses" placeholder="按老人姓名或项目搜索..." class="search-input" />
+      <button @click="fetchExpenses" class="btn btn-primary">搜索</button>
+      <button @click="openModal()" class="btn btn-success">新增消费记录</button>
     </div>
     
     <!-- 数据表格 -->
-    <div v-if="loading" class="loading-text">正在加载护工列表...</div>
+    <div v-if="loading" class="loading-text">正在加载消费记录...</div>
     <div v-else class="table-container">
       <table>
         <thead>
           <tr>
             <th>ID</th>
-            <th>姓名</th>
-            <th>性别</th>
-            <th>年龄</th>
-            <th>联系方式</th>
-            <th>入职日期</th>
-            <th>负责老人数量</th>
+            <th>老人姓名</th>
+            <th>项目名称</th>
+            <th>金额 (元)</th>
+            <th>消费日期</th>
+            <th>备注</th>
             <th>操作</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="careworker in careworkers" :key="careworker.id">
-            <td>{{ careworker.id }}</td>
-            <td>{{ careworker.name }}</td>
-            <td>{{ careworker.gender }}</td>
-            <td>{{ careworker.age }}</td>
-            <td>{{ careworker.contact }}</td>
-            <td>{{ formatDisplayDate(careworker.hireDate) }}</td>
-            <td>{{ careworker.elderCount }}</td>
+          <tr v-for="expense in expenses" :key="expense.id">
+            <td>{{ expense.id }}</td>
+            <td>{{ expense.elderName }}</td>
+            <td>{{ expense.item }}</td>
+            <td>{{ expense.amount }}</td>
+            <td>{{ formatDisplayDate(expense.date) }}</td>
+            <td>{{ expense.notes || '无' }}</td>
             <td>
-              <button @click="openModal(careworker)" class="btn-action edit">编辑</button>
-              <button @click="confirmDelete(careworker.id)" class="btn-action delete">删除</button>
+              <button @click="openDetailModal(expense)" class="btn-action detail">详情</button>
+              <button @click="openModal(expense)" class="btn-action edit">编辑</button>
+              <button @click="confirmDelete(expense.id)" class="btn-action delete">删除</button>
             </td>
           </tr>
-          <tr v-if="!careworkers || careworkers.length === 0">
-            <td colspan="8" class="empty-text">当前没有护工信息或未搜索到结果。</td> 
+          <tr v-if="!expenses || expenses.length === 0">
+            <td colspan="7" class="empty-text">当前没有消费记录或未搜索到结果。</td> 
           </tr>
         </tbody>
       </table>
@@ -50,19 +49,39 @@
     <!-- 新增/编辑弹窗 -->
     <div v-if="isModalVisible" class="modal-overlay" @click="closeModal">
       <div class="modal-content" @click.stop>
-        <h3>{{ isEditing ? '编辑护工信息' : '新增护工' }}</h3>
+        <h3>{{ isEditing ? '编辑消费记录' : '新增消费记录' }}</h3>
         <form @submit.prevent="handleSave">
-          <div class="form-item"><label>姓名:</label><input v-model="currentCareworker.name" type="text" required></div>
-          <div class="form-item"><label>性别:</label><select v-model="currentCareworker.gender" required><option value="男">男</option><option value="女">女</option></select></div>
-          <div class="form-item"><label>年龄:</label><input v-model="currentCareworker.age" type="number" required></div>
-          <div class="form-item"><label>联系方式:</label><input v-model="currentCareworker.contact" type="text" required></div>
-          <div class="form-item"><label>入职日期:</label><input v-model="currentCareworker.hireDate" type="date"></div>
+          <div class="form-item"><label>老人姓名:</label><input v-model="currentExpense.elderName" type="text" required></div>
+          <div class="form-item"><label>项目名称:</label><input v-model="currentExpense.item" type="text" required></div>
+          <div class="form-item"><label>金额 (元):</label><input v-model.number="currentExpense.amount" type="number" step="0.01" required></div>
+          <div class="form-item"><label>消费日期:</label><input v-model="currentExpense.date" type="date" required></div>
+          <div class="form-item"><label>备注:</label><textarea v-model="currentExpense.notes"></textarea></div>
           
           <div class="modal-footer">
             <button type="button" @click="closeModal" class="btn btn-secondary">取消</button>
             <button type="submit" class="btn btn-primary">{{ isEditing ? '保存更新' : '确认新增' }}</button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div v-if="isDetailModalVisible" class="modal-overlay" @click="closeDetailModal">
+      <div class="modal-content detail-modal" @click.stop>
+        <h3>消费记录详情</h3>
+        <div v-if="detailExpense" class="detail-grid">
+          <div class="detail-item"><strong>ID:</strong><span>{{ detailExpense.id }}</span></div>
+          <div class="detail-item"><strong>老人姓名:</strong><span>{{ detailExpense.elderName }}</span></div>
+          <div class="detail-item"><strong>项目名称:</strong><span>{{ detailExpense.item }}</span></div>
+          <div class="detail-item"><strong>金额:</strong><span>{{ detailExpense.amount }} 元</span></div>
+          <div class="detail-item"><strong>消费日期:</strong><span>{{ formatDisplayDate(detailExpense.date) }}</span></div>
+          <div class="detail-item full-width"><strong>备注:</strong><span>{{ detailExpense.notes || '无' }}</span></div>
+          <div class="detail-item"><strong>创建时间:</strong><span>{{ formatDisplayDate(detailExpense.createdAt, true) }}</span></div>
+          <div class="detail-item"><strong>最后更新:</strong><span>{{ formatDisplayDate(detailExpense.updatedAt, true) }}</span></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" @click="closeDetailModal" class="btn btn-primary">关闭</button>
+        </div>
       </div>
     </div>
 
@@ -74,7 +93,7 @@
         </div>
         <div class="modal-body text-center">
           <i class="el-icon-warning-outline text-danger text-2xl mb-4"></i>
-          <p>您确定要删除这位护工的信息吗？</p>
+          <p>您确定要删除这条消费记录吗？</p>
           <p class="text-sm text-gray-500 mt-2">此操作将永久删除该记录，且无法恢复。</p>
         </div>
         <div class="modal-footer">
@@ -93,39 +112,42 @@ import { ElMessage } from 'element-plus';
 import apiClient from '@/api/request';
 
 // --- 响应式状态 ---
-const careworkers = ref([]);
+const expenses = ref([]);
 const loading = ref(true);
 const searchParams = reactive({
   searchTerm: ''
 });
 const isModalVisible = ref(false);
-const currentCareworker = ref({});
+const currentExpense = ref({});
 const isEditing = ref(false);
+const isDetailModalVisible = ref(false);
+const detailExpense = ref(null);
 const isDeleteDialogVisible = ref(false);
-const deletingCareworkerId = ref(null);
+const deletingExpenseId = ref(null);
 
 // --- API 调用函数 ---
-const fetchCareworkers = async () => {
+const fetchExpenses = async () => {
   loading.value = true;
   try {
     // 模拟API请求
     const response = await new Promise(resolve => {
       setTimeout(() => {
         const mockData = [
-          { id: 1, name: '王阿姨', gender: '女', age: 45, contact: '13811112222', hireDate: '2019-03-15', elderCount: 5 },
-          { id: 2, name: '李师傅', gender: '男', age: 50, contact: '13933334444', hireDate: '2018-07-01', elderCount: 3 },
-          { id: 3, name: '张小丽', gender: '女', age: 30, contact: '13755556666', hireDate: '2021-01-10', elderCount: 7 },
+          { id: 1, elderName: '张三', item: '伙食费', amount: 1500.00, date: '2024-06-01', notes: '6月份餐费', createdAt: '2024-06-01T09:00:00Z', updatedAt: '2024-06-01T09:00:00Z' },
+          { id: 2, elderName: '李四', item: '药品费', amount: 88.50, date: '2024-06-05', notes: '降压药', createdAt: '2024-06-05T10:30:00Z', updatedAt: '2024-06-05T10:30:00Z' },
+          { id: 3, elderName: '张三', item: '理发费', amount: 30.00, date: '2024-06-10', notes: '每月一次', createdAt: '2024-06-10T14:00:00Z', updatedAt: '2024-06-10T14:00:00Z' },
+          { id: 4, elderName: '王五', item: '特护费', amount: 500.00, date: '2024-06-15', notes: '临时特护服务', createdAt: '2024-06-15T16:00:00Z', updatedAt: '2024-06-15T16:00:00Z' },
         ];
-        const filteredData = mockData.filter(cw =>
-          (cw.name && cw.name.includes(searchParams.searchTerm)) ||
-          (cw.id && String(cw.id).includes(searchParams.searchTerm))
+        const filteredData = mockData.filter(exp =>
+          (exp.elderName && exp.elderName.includes(searchParams.searchTerm)) ||
+          (exp.item && exp.item.includes(searchParams.searchTerm))
         );
         resolve({ data: { code: 0, data: filteredData } });
       }, 500);
     });
 
     if (response.data.code === 0) {
-      careworkers.value = response.data.data;
+      expenses.value = response.data.data;
     } else {
       throw new Error(response.data.msg || '获取数据失败');
     }
@@ -138,72 +160,82 @@ const fetchCareworkers = async () => {
 
 const handleSave = async () => {
   try {
-    if (!currentCareworker.value.name || !currentCareworker.value.gender || !currentCareworker.value.age || !currentCareworker.value.contact) {
-      ElMessage.error('请填写所有必填项 (姓名, 性别, 年龄, 联系方式)');
+    if (!currentExpense.value.elderName || !currentExpense.value.item || currentExpense.value.amount === null || !currentExpense.value.date) {
+      ElMessage.error('请填写所有必填项 (老人姓名, 项目名称, 金额, 消费日期)');
       return;
+    }
+    if (isNaN(currentExpense.value.amount) || currentExpense.value.amount <= 0) {
+        ElMessage.error('金额必须是有效的正数');
+        return;
     }
 
     // 模拟API请求
     await new Promise(resolve => setTimeout(resolve, 300));
 
     if (isEditing.value) {
-      const index = careworkers.value.findIndex(cw => cw.id === currentCareworker.value.id);
+      const index = expenses.value.findIndex(exp => exp.id === currentExpense.value.id);
       if (index !== -1) {
-        careworkers.value[index] = { ...currentCareworker.value };
+        expenses.value[index] = { ...currentExpense.value, updatedAt: new Date().toISOString() };
       }
-      ElMessage.success('护工信息更新成功！');
+      ElMessage.success('消费记录更新成功！');
     } else {
-      const newId = Math.max(...careworkers.value.map(cw => cw.id), 0) + 1;
-      careworkers.value.push({ id: newId, ...currentCareworker.value, elderCount: 0 }); // 新增护工初始负责老人为0
-      ElMessage.success('新增护工成功！');
+      const newId = Math.max(...expenses.value.map(exp => exp.id), 0) + 1;
+      expenses.value.push({ 
+        id: newId, 
+        ...currentExpense.value, 
+        createdAt: new Date().toISOString(), 
+        updatedAt: new Date().toISOString(),
+        notes: currentExpense.value.notes || ''
+      });
+      ElMessage.success('新增消费记录成功！');
     }
     closeModal();
-    await fetchCareworkers();
+    await fetchExpenses();
   } catch (error) {
     ElMessage.error(error.response?.data?.msg || '操作失败，请检查输入');
   }
 };
 
 const confirmDelete = (id) => {
-  deletingCareworkerId.value = id;
+  deletingExpenseId.value = id;
   isDeleteDialogVisible.value = true;
 };
 
 const handleConfirmDelete = async () => {
-  if (!deletingCareworkerId.value) return;
+  if (!deletingExpenseId.value) return;
   
   try {
     // 模拟API请求
     await new Promise(resolve => setTimeout(resolve, 300));
     
-    careworkers.value = careworkers.value.filter(cw => cw.id !== deletingCareworkerId.value);
+    expenses.value = expenses.value.filter(exp => exp.id !== deletingExpenseId.value);
     ElMessage.success('删除成功！');
     isDeleteDialogVisible.value = false;
-    await fetchCareworkers();
+    await fetchExpenses();
   } catch (error) {
     ElMessage.error(error.response?.data?.msg || '删除失败，请重试');
     isDeleteDialogVisible.value = false;
   } finally {
-    deletingCareworkerId.value = null;
+    deletingExpenseId.value = null;
   }
 };
 
 // --- 弹窗控制 ---
-const openModal = (careworker = null) => {
-  if (careworker) {
+const openModal = (expense = null) => {
+  if (expense) {
     isEditing.value = true;
-    currentCareworker.value = { 
-      ...careworker,
-      hireDate: careworker.hireDate ? formatDisplayDate(careworker.hireDate) : ''
+    currentExpense.value = { 
+      ...expense,
+      date: expense.date ? formatDisplayDate(expense.date) : ''
     };
   } else {
     isEditing.value = false;
-    currentCareworker.value = {
-        name: '', 
-        gender: '男',
-        age: null,
-        contact: '', 
-        hireDate: formatDisplayDate(new Date()) // 默认当天
+    currentExpense.value = {
+        elderName: '', 
+        item: '',
+        amount: null,
+        date: formatDisplayDate(new Date()), 
+        notes: ''
     };
   }
   isModalVisible.value = true;
@@ -211,7 +243,17 @@ const openModal = (careworker = null) => {
 
 const closeModal = () => {
   isModalVisible.value = false;
-  currentCareworker.value = {};
+  currentExpense.value = {};
+};
+
+const openDetailModal = (expense) => {
+  detailExpense.value = expense;
+  isDetailModalVisible.value = true;
+};
+
+const closeDetailModal = () => {
+  isDetailModalVisible.value = false;
+  detailExpense.value = null;
 };
 
 // --- 工具函数 ---
@@ -240,14 +282,50 @@ const formatDisplayDate = (dateString, showTime = false) => {
 };
 
 // --- 生命周期钩子 ---
-onMounted(fetchCareworkers);
+onMounted(fetchExpenses);
 </script>
 
 <style scoped>
 /* 详情按钮颜色 */
 .btn-action.detail { color: #409eff; }
 
-.CareWorker-View { padding: 20px; }
+.detail-modal {
+  width: 700px;
+  max-width: 95%;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px 25px;
+  text-align: left;
+}
+
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  border-bottom: 1px solid #f0f2f5;
+  padding-bottom: 10px;
+  font-size: 14px;
+}
+
+.detail-item strong {
+  color: #555;
+  min-width: 90px;
+  font-weight: bold;
+}
+
+.detail-item span {
+  color: #333;
+  word-break: break-all;
+}
+
+.detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
+/* --- 以下是通用样式 (与ElderView保持一致，或根据需要微调) --- */
+.Expenses-View { padding: 20px; }
 .view-title { font-size: 24px; margin-bottom: 20px; color: #333; }
 .loading-text, .empty-text { font-size: 16px; color: #888; text-align: center; padding: 40px; }
 .toolbar { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -270,7 +348,8 @@ th { background-color: #fafafa; font-weight: bold; color: #666; }
 .modal-content h3 { margin-top: 0; margin-bottom: 25px; }
 .form-item { margin-bottom: 15px; }
 .form-item label { display: block; margin-bottom: 5px; font-weight: bold; }
-.form-item input, .form-item select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+.form-item input, .form-item textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+.form-item textarea { min-height: 80px; resize: vertical; }
 .modal-footer { text-align: right; margin-top: 30px; }
 .modal-footer button { margin-left: 10px; }
 
