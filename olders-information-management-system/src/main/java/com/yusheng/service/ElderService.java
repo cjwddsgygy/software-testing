@@ -20,4 +20,6 @@ public interface ElderService {
 
     //    修改老人
     void update(Elder elder);
+
+    List<Elder> findUnassigned();
 }

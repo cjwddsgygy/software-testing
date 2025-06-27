@@ -20,4 +20,7 @@ public interface BedsService {
 
     //    修改床位
     void update(Bed bed);
+
+
+    List<Bed> findPage(String status, String search);
 }

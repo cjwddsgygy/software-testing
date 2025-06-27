@@ -10,7 +10,8 @@
         <ul>
           <!-- 使用 <router-link> 进行导航 -->
           <li><router-link to="/dashboard/home" class="nav-link">首页</router-link></li>
-          <li><router-link to="/dashboard/older-management" class="nav-link">老人管理</router-link></li>
+		  <li><router-link to="/dashboard/care-worker" class="nav-link">护工信息管理</router-link></li>
+          <li><router-link to="/dashboard/elder" class="nav-link">老人信息管理</router-link></li>
           <li><router-link to="/dashboard/bed-management" class="nav-link">床位管理</router-link></li>
           <li><router-link to="/dashboard/system-settings" class="nav-link">系统设置</router-link></li>
         </ul>

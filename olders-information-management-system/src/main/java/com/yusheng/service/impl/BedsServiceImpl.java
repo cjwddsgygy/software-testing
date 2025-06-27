@@ -1,9 +1,7 @@
 package com.yusheng.service.impl;
 
 import com.yusheng.mapper.BedsMapper;
-import com.yusheng.mapper.ExpensesMapper;
 import com.yusheng.pojo.Bed;
-import com.yusheng.pojo.Expense;
 import com.yusheng.service.BedsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +13,7 @@ import java.util.List;
 public class BedsServiceImpl implements BedsService {
 
     @Autowired
-    private BedsMapper bedsMapper;
+    public BedsMapper bedsMapper;
 
     //    查询全部床位情况
     @Override
@@ -50,4 +48,13 @@ public class BedsServiceImpl implements BedsService {
         bedsMapper.updateById(bed);
     }
 
+
+
+    @Override
+    public List<Bed> findPage(String status, String search) {
+        return bedsMapper.findPage();
+    }
+
 }
+
+

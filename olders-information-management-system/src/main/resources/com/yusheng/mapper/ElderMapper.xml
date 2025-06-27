@@ -6,7 +6,7 @@
 
 <!--    查询全部老人数据-->
     <select id="findAll" resultType="com.yusheng.pojo.Elder">
-        select id,
+        select elders_id,
                name,
                age,
                birth_date,
@@ -30,9 +30,13 @@
         order by updated_at desc
     </select>
 
+    <select id="findUnassigned" resultType="com.yusheng.pojo.Elder">
+        SELECT * FROM elders WHERE elders_id NOT IN (SELECT elders_id FROM beds WHERE elders_id IS NOT NULL)
+    </select>
+
 <!--    删除老人-->
     <delete id="deleteById">
-        delete from elders where id = #{id}
+        delete from elders where elders_id = #{id}
     </delete>
 
 <!--    新增老人-->
@@ -49,7 +53,7 @@
 
 <!--    根据ID查询老人信息-->
     <select id="getById" resultType="com.yusheng.pojo.Elder">
-        select id,
+        select elders_id,
                name,
                age,
                birth_date,
@@ -70,7 +74,7 @@
                created_at,
                updated_at
         from elders
-        where id = #{id}
+        where elders_id = #{id}
     </select>
 
 <!--    修改老人-->

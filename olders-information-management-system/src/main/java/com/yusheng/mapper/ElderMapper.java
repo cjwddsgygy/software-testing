@@ -11,6 +11,9 @@ public interface ElderMapper {
     //    查询全部老人数据
     List<Elder> findAll();
 
+    //    查询无床位老人数据
+    List<Elder> findUnassigned();
+
     //    删除老人
     void deleteById(Integer id);
 
@@ -22,4 +25,5 @@ public interface ElderMapper {
 
     //    修改老人
     void updateById(Elder elder);
+
 }

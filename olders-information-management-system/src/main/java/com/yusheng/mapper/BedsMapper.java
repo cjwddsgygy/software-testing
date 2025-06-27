@@ -1,7 +1,7 @@
+// src/main/java/com/yusheng/mapper/BedsMapper.java
 package com.yusheng.mapper;
 
 import com.yusheng.pojo.Bed;
-import com.yusheng.pojo.Expense;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -9,8 +9,12 @@ import java.util.List;
 @Mapper
 public interface BedsMapper {
 
-    //    查询全部床位情况
-    List<Bed> findAll();
+    /**
+     * 分页和条件查询床位信息（包含老人姓名）
+     *
+     * @return 床位列表
+     */
+    List<Bed> findPage();
 
     //    删除床位
     void deleteById(Integer id);
@@ -23,4 +27,6 @@ public interface BedsMapper {
 
     //    修改床位
     void updateById(Bed bed);
+
+    List<Bed> findAll();
 }

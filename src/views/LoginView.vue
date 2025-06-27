@@ -1,4 +1,4 @@
-<!-- START OF FILE LoginView.vue -->
+<!-- frontend/src/views/LoginView.vue -->
 <template>
   <div class="login-container">
     <div class="login-box">
@@ -24,7 +24,8 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios'; // 引入 axios
+// --- 关键修改 1: 导入我们配置好的 apiClient ---
+import apiClient from '@/api'; // 不再使用原始的 axios
 
 const router = useRouter();
 
@@ -40,34 +41,46 @@ const handleLogin = async () => {
   errorMessage.value = '';
 
   try {
-    // 发送 POST 请求到你的后端 API
-    const response = await axios.post('http://localhost:8080/admin/login', {
-      account: form.username, // 注意：后端需要的字段是 account 和 password
+    // --- 关键修改 2: 使用 apiClient 发送请求 ---
+    const response = await apiClient.post('/admin/login', { // 确认API路径为 /admin/login
+      account: form.username,
       password: form.password
     });
 
+    console.log('后端登录响应:', response.data);
 
-  // --- 关键调试代码 ---
-  console.log('后端返回的完整数据:', response.data); 
-  // --------------------
-    // 假设后端成功时返回的数据结构包含一个 code 字段
-    // 请根据你后端实际返回的数据结构来判断是否登录成功
-    if (response.data.code === 1) { //  code '1' 表示成功
-      console.log('登录成功:', response.data);
-      // 可以在此保存 token 等用户信息
-      // localStorage.setItem('token', response.data.data.token);
+    // 判断登录是否成功 (code === 1)
+    if (response.data.code === 1) {
       
-      router.push('/dashboard'); // 跳转到仪表盘
+      // --- 关键修改 3: 保存 Token ---
+      const token = response.data.data.token;
+      
+      if (token) {
+        // 1. 将 Token 存储到浏览器的 localStorage 中
+        localStorage.setItem('authToken', token);
+        console.log('Token 已成功保存到 localStorage');
+
+        // 2. 立即为 apiClient 的后续请求设置默认头部
+        apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        
+        // 3. 跳转到主页 (根据您的路由配置，主页是 /dashboard)
+        router.push('/dashboard');
+
+      } else {
+        errorMessage.value = '登录凭证获取失败，请联系管理员。';
+        console.error('登录成功但响应中缺少 token');
+      }
+
     } else {
-      // 后端返回了业务错误，例如“用户名或密码错误”
+      // 处理业务错误，例如密码错误
       errorMessage.value = response.data.msg || '用户名或密码错误';
     }
   } catch (error) {
+    // 处理网络或服务器错误
     console.error('登录请求失败:', error);
     if (error.code === 'ERR_NETWORK') {
-        errorMessage.value = '网络错误，请检查后端服务是否开启，或是否存在跨域问题。';
+        errorMessage.value = '网络错误，请检查后端服务是否开启。';
     } else if (error.response) {
-        // 后端返回了 HTTP 错误状态码 (如 401, 500)
         errorMessage.value = `登录失败: ${error.response.data.msg || '服务器错误'}`;
     } else {
         errorMessage.value = '登录时发生未知错误。';
@@ -79,7 +92,7 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-/* 样式与之前相同 */
+/* 样式保持不变 */
 .login-container { display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f2f5; }
 .login-box { width: 400px; padding: 40px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); text-align: center; }
 .title { font-size: 24px; color: #333; margin-bottom: 30px; }

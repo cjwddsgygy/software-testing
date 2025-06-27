@@ -4,7 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import LoginView from '../views/LoginView.vue';
 import DashboardView from '../views/DashboardView.vue';
 import HomeView from '../views/HomeView.vue';
-import OlderManagement from '../views/OlderManagement.vue';
+import ElderView from '../views/ElderView.vue';
 import BedManagement from '../views/BedManagement.vue';
 import SystemSettings from '../views/SystemSettings.vue';
 
@@ -30,11 +30,6 @@ const routes = [
         component: HomeView
       },
       {
-        path: 'older-management',
-        name: 'OlderManagement',
-        component: OlderManagement
-      },
-      {
         path: 'bed-management',
         name: 'BedManagement',
         component: BedManagement
@@ -43,7 +38,16 @@ const routes = [
         path: 'system-settings',
         name: 'SystemSettings',
         component: SystemSettings
-      }
+      },
+	  { path: 'elder', 
+	  name: 'Elder', 
+	  component: () => import('@/views/ElderView.vue'), 
+	  meta: { title: '老人信息管理' } },
+	  // --- 新增护工管理路由 ---
+	  { path: 'care-worker',
+	  name: 'CareWorker',
+	  component: () => import('@/views/CareWorkerView.vue'),
+	  meta: { title: '护工信息管理' } },
     ]
   }
 ];

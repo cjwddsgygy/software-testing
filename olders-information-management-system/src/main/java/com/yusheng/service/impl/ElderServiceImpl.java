@@ -47,4 +47,7 @@ public class ElderServiceImpl implements ElderService {
         elder.setUpdatedAt(LocalDateTime.now());
         elderMapper.updateById(elder);
     }
+
+    @Override
+    public List<Elder> findUnassigned() {return elderMapper.findUnassigned();}
 }

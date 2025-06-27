@@ -4,38 +4,62 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.yusheng.mapper.BedsMapper">
 
-<!--    查询全部床位情况-->
-    <select id="findAll" resultType="com.yusheng.pojo.Bed">
-        select id, room_number, bed_number, status, created_at, updated_at
-        from beds
-        order by updated_at desc
+    <!--   *** 这是全新的 findPage 方法，替代原来的 findAll *** -->
+    <select id="findPage" resultType="com.yusheng.pojo.Bed">
+        SELECT
+        b.id,
+        b.room_number,
+        b.bed_number,
+        b.status,
+        b.elders_id,
+        b.created_at,
+        b.updated_at,
+        e.name AS elderName
+        FROM
+        beds b
+        LEFT JOIN
+        elders e ON b.elders_id = e.elders_id
+        <where>
+            <if test="status != null and status != ''">
+                AND b.status = #{status}
+            </if>
+            <if test="search != null and search != ''">
+                AND b.bed_number LIKE CONCAT('%', #{search}, '%')
+            </if>
+        </where>
+        ORDER BY
+        b.room_number, b.bed_number
     </select>
 
-<!--    删除床位-->
+    <!--    删除床位 -->
     <delete id="deleteById">
         delete from beds where id = #{id}
     </delete>
 
-<!--    新增床位-->
+    <!--    新增床位 (需要加入 elder_id) -->
     <insert id="save">
-        insert into beds(room_number, bed_number, status, created_at, updated_at)
-        values (#{roomNumber}, #{bedNumber}, #{status}, #{createdAt}, #{updatedAt})
+        insert into beds(room_number, bed_number, status, elders_id, created_at, updated_at)
+        values (#{roomNumber}, #{bedNumber}, #{status}, #{elderId}, #{createdAt}, #{updatedAt})
     </insert>
 
-<!--    根据ID查询床位信息-->
+    <!--    根据ID查询床位信息 -->
     <select id="getById" resultType="com.yusheng.pojo.Bed">
-        select id, room_number, bed_number, status, created_at, updated_at
+        select id, room_number, bed_number, status, elders_id, created_at, updated_at
         from beds
         where id = #{id}
     </select>
 
-<!--    修改床位-->
+    <!--    修改床位 (需要加入 elder_id) -->
     <update id="updateById">
         update beds
         <set>
             <if test="roomNumber != null and roomNumber != ''">room_number = #{roomNumber},</if>
             <if test="bedNumber != null and bedNumber != ''">bed_number = #{bedNumber},</if>
             <if test="status != null and status != ''">status = #{status},</if>
+            <!-- 允许将 elder_id 设置为 null (办理退住) -->
+            <if test="elderId != null">
+                elder_id = #{elderId},
+            </if>
             <if test="updatedAt != null">updated_at = #{updatedAt}</if>
         </set>
         where id = #{id}
