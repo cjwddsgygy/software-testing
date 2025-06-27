@@ -41,7 +41,7 @@ const handleLogin = async () => {
 
   try {
     // 发送 POST 请求到你的后端 API
-    const response = await axios.post('http://localhost:8080/admins/login', {
+    const response = await axios.post('http://localhost:8080/admin/login', {
       account: form.username, // 注意：后端需要的字段是 account 和 password
       password: form.password
     });
