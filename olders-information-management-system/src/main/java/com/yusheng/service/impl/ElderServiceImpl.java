@@ -29,10 +29,16 @@ public List<Elder> findElders(Integer id, String name) {
     }
 
 //    新增老人
+
     @Override
     public void save(Elder elder) {
-        elder.setCreatedAt(LocalDateTime.now());
-        elder.setUpdatedAt(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now(); // 获取当前服务器时间
+
+        // 为新增操作设置所有关键时间
+        elder.setCheckInDate(now); // ✅ 设置入院时间
+        elder.setCreatedAt(now);   // ✅ 设置创建时间
+        elder.setUpdatedAt(now);   // ✅ 设置更新时间
+
         elderMapper.save(elder);
     }
 

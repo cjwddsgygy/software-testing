@@ -14,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -29,33 +30,60 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        // 我们只对非登录请求进行处理
+        if (request.getRequestURI().equals("/admin/login")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String authHeader = request.getHeader("Authorization");
+
+        System.out.println("\n\n<<<<<<<<<<<<<<<<<< JWT FILTER DEBUG START >>>>>>>>>>>>>>>>>>");
+        System.out.println("REQUEST URI: " + request.getRequestURI());
+        System.out.println("AUTHORIZATION HEADER: " + authHeader);
 
         if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
             String jwt = authHeader.substring(7);
+            System.out.println("  [Step 1] Extracted JWT: " + jwt);
 
-            // 调用我们健壮的 parseToken 方法，它可能返回 null
             Claims claims = JwtUtils.parseToken(jwt);
 
-            // ✅✅✅ 最终、最关键的修改：在访问 claims 对象之前，必须检查它是否为 null！
             if (claims != null) {
-                // 只有当 claims 不是 null 时，才尝试从中获取 id
-                Integer adminId = (Integer) claims.get("id");
+                System.out.println("  [Step 2] SUCCESS: JWT parsing successful.");
+                System.out.println("     Claims content: " + claims.toString());
 
-                if (adminId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    Admin admin = adminService.getById(adminId);
-                    if (admin != null) {
-                        UserDetails userDetails = new User(admin.getAccount(), "", new ArrayList<>());
+                if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                    System.out.println("  [Step 3] INFO: SecurityContext is empty, proceeding with authentication.");
+
+                    Integer adminId = claims.get("id", Integer.class);
+                    String account = claims.get("account", String.class);
+
+                    System.out.println("     [DEBUG] Claim 'id' value: " + adminId);
+                    System.out.println("     [DEBUG] Claim 'account' value: " + account);
+
+                    if (adminId != null && StringUtils.hasText(account)) {
+                        UserDetails userDetails = new User(account, "", new ArrayList<>());
                         UsernamePasswordAuthenticationToken authenticationToken =
                                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
                         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                        System.out.println("  [Step 4] SUCCESS: Authentication object set in SecurityContext for user: " + account);
+                    } else {
+                        System.out.println("  [Step 4] FAILURE: 'id' or 'account' claim is missing from token.");
                     }
+                } else {
+                    System.out.println("  [Step 3] INFO: SecurityContext already contains an Authentication object. Skipping.");
                 }
+            } else {
+                System.out.println("  [Step 2] FAILURE: JWT parsing returned NULL. Token is likely invalid, expired, or signature does not match.");
             }
-            // 如果 claims 是 null，我们会直接跳过整个 if 代码块，不执行任何操作
+        } else {
+            System.out.println("  [Step 1] INFO: No Bearer token found in request.");
         }
 
-        // 无论如何，最后都必须放行请求
+        System.out.println("<<<<<<<<<<<<<<<<<<< JWT FILTER DEBUG END >>>>>>>>>>>>>>>>>\n\n");
+
         filterChain.doFilter(request, response);
     }
 }

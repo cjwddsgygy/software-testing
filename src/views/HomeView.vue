@@ -26,7 +26,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import apiClient from '../api'; // 使用全局配置
+import apiClient from '@/api/request'; // 使用全局配置
 
 const stats = ref({});
 const loading = ref(true);

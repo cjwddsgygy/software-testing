@@ -1,4 +1,4 @@
-// 文件路径: src/api/user.js
+// 文件路径: src/api/admin.js
 
 import request from './request';
 

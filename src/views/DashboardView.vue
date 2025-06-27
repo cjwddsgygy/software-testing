@@ -32,13 +32,19 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth'; // ✅ 1. 导入你的 auth store
 
 const router = useRouter();
+const authStore = useAuthStore(); // ✅ 2. 获取 store 实例
 
 const handleLogout = () => {
   console.log('用户退出登录');
-  // 可以在这里清除 token 或用户会话
-  // 然后跳转回登录页
+  
+  // ✅ 3. 调用 store 的 logout action
+  // 它会自动清除 token, user, localStorage 和 Axios 头部
+  authStore.logout();
+  
+  // 4. 跳转回登录页
   router.push('/login');
 };
 </script>

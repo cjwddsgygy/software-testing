@@ -24,10 +24,10 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-// --- 关键修改 1: 导入我们配置好的 apiClient ---
-import apiClient from '@/api'; // 不再使用原始的 axios
+import { useAuthStore } from '@/stores/auth'; // ✅ 1. 导入你的 auth store
 
 const router = useRouter();
+const authStore = useAuthStore(); // ✅ 2. 获取 store 实例
 
 const form = reactive({
   username: '',
@@ -41,50 +41,21 @@ const handleLogin = async () => {
   errorMessage.value = '';
 
   try {
-    // --- 关键修改 2: 使用 apiClient 发送请求 ---
-    const response = await apiClient.post('/admin/login', { // 确认API路径为 /admin/login
-      account: form.username,
-      password: form.password
+    // ✅ 3. 调用 store 的 login action
+    // login action 内部会处理 API 调用、状态更新和持久化
+    await authStore.login({ 
+      username: form.username, 
+      password: form.password 
     });
 
-    console.log('后端登录响应:', response.data);
+    // 如果 login action 没有抛出错误，就说明登录成功
+    ElMessage.success('登录成功！'); // (可选) 给出成功提示
+    router.push('/dashboard/home'); // 跳转到主页
 
-    // 判断登录是否成功 (code === 0)
-    if (response.data.code === 0) {
-      
-      // --- 关键修改 3: 保存 Token ---
-      const token = response.data.data.token;
-      
-      if (token) {
-        // 1. 将 Token 存储到浏览器的 localStorage 中
-        localStorage.setItem('token', token);
-        console.log('Token 已成功保存到 localStorage');
-
-        // 2. 立即为 apiClient 的后续请求设置默认头部
-        apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        
-        // 3. 跳转到主页 (根据您的路由配置，主页是 /dashboard)
-        router.push('/dashboard');
-
-      } else {
-        errorMessage.value = '登录凭证获取失败，请联系管理员。';
-        console.error('登录成功但响应中缺少 token');
-      }
-
-    } else {
-      // 处理业务错误，例如密码错误
-      errorMessage.value = response.data.msg || '用户名或密码错误';
-    }
   } catch (error) {
-    // 处理网络或服务器错误
-    console.error('登录请求失败:', error);
-    if (error.code === 'ERR_NETWORK') {
-        errorMessage.value = '网络错误，请检查后端服务是否开启。';
-    } else if (error.response) {
-        errorMessage.value = `登录失败: ${error.response.data.msg || '服务器错误'}`;
-    } else {
-        errorMessage.value = '登录时发生未知错误。';
-    }
+    // login action 内部如果登录失败会抛出错误，我们在这里捕获
+    console.error('登录失败:', error);
+    errorMessage.value = error.message || '用户名或密码错误';
   } finally {
     loading.value = false;
   }

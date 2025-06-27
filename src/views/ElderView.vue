@@ -5,7 +5,6 @@
 
     <!-- Toolbar: 统一搜索框和新增按钮 -->
     <div class="toolbar">
-      <!-- 关键修改: v-model 绑定到 searchParams.searchTerm -->
       <input type="text" v-model="searchParams.searchTerm" @keyup.enter="fetchElders" placeholder="按姓名或ID搜索..." class="search-input" />
       <button @click="fetchElders" class="btn btn-primary">搜索</button>
       <button @click="openModal()" class="btn btn-success">新增老人</button>
@@ -19,34 +18,37 @@
           <tr>
             <th>ID</th>
             <th>姓名</th>
-            <th>账户名</th>
             <th>年龄</th>
+            <th>出生日期</th>
+            <th>民族</th>          
+            <th>教育程度</th>      
+            <th>账户名</th>
             <th>床位号</th>
             <th>护理级别</th>
             <th>家属联系方式</th>
-            <th>入院时间</th>
             <th>操作</th>
           </tr>
         </thead>
         <tbody>
-          <!-- 注意: :key 应该使用唯一的ID, 比如 edler.id -->
           <tr v-for="elder in elders" :key="elder.id">
             <td>{{ elder.id }}</td>
             <td>{{ elder.name }}</td>
-            <td>{{ elder.account }}</td>
             <td>{{ elder.age }}</td>
+            <td>{{ formatDisplayDate(elder.birthDate) }}</td>
+            <td>{{ elder.ethnicity }}</td> 
+            <td>{{ elder.education }}</td> 
+            <td>{{ elder.account }}</td>
             <td>{{ elder.bedNumber }}</td>
             <td>{{ elder.careLevel }}</td>
             <td>{{ elder.relativeContact }}</td>
-            <td>{{ formatDisplayDate(elder.checkInDate) }}</td>
             <td>
               <button @click="openDetailModal(elder)" class="btn-action detail">详情</button>
               <button @click="openModal(elder)" class="btn-action edit">编辑</button>
-              <button @click="handleDelete(elder.id)" class="btn-action delete">删除</button>
+              <button @click="confirmDelete(elder.id)" class="btn-action delete">删除</button>
             </td>
           </tr>
           <tr v-if="!elders || elders.length === 0">
-            <td colspan="9" class="empty-text">当前没有在院老人信息或未搜索到结果。</td>
+            <td colspan="11" class="empty-text">当前没有在院老人信息或未搜索到结果。</td> 
           </tr>
         </tbody>
       </table>
@@ -57,13 +59,23 @@
       <div class="modal-content" @click.stop>
         <h3>{{ isEditing ? '编辑老人信息' : '新增老人' }}</h3>
         <form @submit.prevent="handleSave">
+          <!-- 姓名 (必填) -->
           <div class="form-item"><label>姓名:</label><input v-model="currentElder.name" type="text" required></div>
-          <div class="form-item"><label>账户名:</label><input v-model="currentElder.account" type="text" required></div>
+          <!-- 年龄 (必填) -->
           <div class="form-item"><label>年龄:</label><input v-model="currentElder.age" type="number" required></div>
+          <!-- 出生日期 (必填) -->
+          <div class="form-item"><label>出生日期:</label><input v-model="currentElder.birthDate" type="date" required></div>
+          <!-- 民族 (必填，解决非空约束) -->
+          <div class="form-item"><label>民族:</label><input v-model="currentElder.ethnicity" type="text" required></div>
+          <!-- 账户名 (必填) -->
+          <div class="form-item"><label>账户名:</label><input v-model="currentElder.account" type="text" required></div>
+          
+          <!-- 以下是可选字段 -->
           <div class="form-item"><label>床位号:</label><input v-model="currentElder.bedNumber" type="text"></div>
           <div class="form-item"><label>护理级别:</label><input v-model="currentElder.careLevel" type="text"></div>
-          <div class="form-item"><label>家属联系方式:</label><input v-model="currentElder.relativeContact" type="text"></div>
-          <div class="form-item"><label>入院时间:</label><input v-model="currentElder.checkInDate" type="date"></div>
+          
+          <!-- 默认不展示的字段，但在 currentElder 初始化时需要赋值以避免后端报错 -->
+          
           <div class="modal-footer">
             <button type="button" @click="closeModal" class="btn btn-secondary">取消</button>
             <button type="submit" class="btn btn-primary">{{ isEditing ? '保存更新' : '确认新增' }}</button>
@@ -103,42 +115,53 @@
       </div>
     </div>
 
+    <!-- 删除确认弹窗 -->
+    <div v-if="isDeleteDialogVisible" class="custom-modal-overlay" @click="isDeleteDialogVisible = false">
+      <div class="custom-modal-content" @click.stop>
+        <div class="modal-header">
+          <h3 class="modal-title">确认删除</h3>
+        </div>
+        <div class="modal-body text-center">
+          <i class="el-icon-warning-outline text-danger text-2xl mb-4"></i>
+          <p>您确定要删除这位老人的信息吗？</p>
+          <p class="text-sm text-gray-500 mt-2">此操作将永久删除该记录，且无法恢复。</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" @click="isDeleteDialogVisible = false">取消</button>
+          <button type="button" class="btn btn-danger" @click="handleConfirmDelete">确认删除</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
-import apiClient from '@/api'; // 确保这是你配置好的 Axios 实例
+import { ElMessage } from 'element-plus';
+import apiClient from '@/api/request';
 
 // --- 响应式状态 ---
 const elders = ref([]);
 const loading = ref(true);
-
-// 关键修改: 使用统一的 searchTerm
 const searchParams = reactive({
   searchTerm: ''
 });
-
-// 新增/编辑弹窗状态
 const isModalVisible = ref(false);
 const currentElder = ref({});
 const isEditing = ref(false);
-
-// 详情弹窗状态
 const isDetailModalVisible = ref(false);
 const detailElder = ref(null);
+const isDeleteDialogVisible = ref(false); // 控制删除确认对话框的显示
+const deletingElderId = ref(null); // 存储当前要删除的老人ID
 
 // --- API 调用函数 ---
 const fetchElders = async () => {
   loading.value = true;
   try {
     const response = await apiClient.get('/elders', {
-      params: { // 只发送 searchTerm
-        searchTerm: searchParams.searchTerm 
-      }
+      params: { searchTerm: searchParams.searchTerm }
     });
-    
     if (response.data.code === 0) {
       elders.value = response.data.data;
     } else {
@@ -153,6 +176,12 @@ const fetchElders = async () => {
 
 const handleSave = async () => {
   try {
+    // 前端必填项校验
+    if (!currentElder.value.name || !currentElder.value.age || !currentElder.value.birthDate || !currentElder.value.ethnicity || !currentElder.value.account) {
+      ElMessage.error('请填写所有必填项 (姓名, 年龄, 出生日期, 民族, 账户名)');
+      return;
+    }
+
     if (isEditing.value) {
       await apiClient.put('/elders', currentElder.value);
       ElMessage.success('老人信息更新成功！');
@@ -167,23 +196,26 @@ const handleSave = async () => {
   }
 };
 
-const handleDelete = async (id) => {
-  try {
-    await ElMessageBox.confirm('您确定要删除这位老人的信息吗?', '警告', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    });
-    
-    // 使用RESTful风格的DELETE请求
-    await apiClient.delete(`/elders/${id}`);
+// 确认删除，显示对话框
+const confirmDelete = (id) => {
+  deletingElderId.value = id;
+  isDeleteDialogVisible.value = true;
+};
 
+// 处理确认删除操作
+const handleConfirmDelete = async () => {
+  if (!deletingElderId.value) return;
+  
+  try {
+    await apiClient.delete(`/elders/${deletingElderId.value}`);
     ElMessage.success('删除成功！');
-    await fetchElders();
+    isDeleteDialogVisible.value = false;
+    await fetchElders(); // 刷新列表
   } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error(error.response?.data?.msg || '删除操作失败');
-    }
+    ElMessage.error(error.response?.data?.msg || '删除失败，请重试');
+    isDeleteDialogVisible.value = false;
+  } finally {
+    deletingElderId.value = null;
   }
 };
 
@@ -192,15 +224,38 @@ const openModal = (elder = null) => {
   if (elder) {
     isEditing.value = true;
     currentElder.value = { 
-      ...elder, 
-      checkInDate: elder.checkInDate ? elder.checkInDate.split('T')[0] : ''
+      ...elder,
+      birthDate: elder.birthDate ? formatDisplayDate(elder.birthDate) : '',
+      
+      ethnicity: elder.ethnicity || '',       
+      education: elder.education || '',       
+      maritalStatus: elder.maritalStatus || '', 
+      hobbies: elder.hobbies || '',           
+      medicalCare: elder.medicalCare || '',   
+      feeType: elder.feeType || '月结',       
+      expenses: elder.expenses || null,       
+      bedNumber: elder.bedNumber || '',       
+      careLevel: elder.careLevel || '',       
+      relativeContact: elder.relativeContact || '' 
     };
   } else {
     isEditing.value = false;
     currentElder.value = {
-        name: '', account: '', age: null, bedNumber: '',
-        careLevel: '三级护理', relativeContact: '', 
-        checkInDate: new Date().toISOString().split('T')[0]
+        name: '', 
+        age: null,
+        birthDate: '', 
+        ethnicity: '', 
+        account: '', 
+        
+        education: '',         
+        maritalStatus: '',     
+        hobbies: '',           
+        medicalCare: '',   
+        feeType: '月结',       
+        expenses: null,        
+        bedNumber: '',         
+        careLevel: '',         
+        relativeContact: ''    
     };
   }
   isModalVisible.value = true;
@@ -316,4 +371,70 @@ th { background-color: #fafafa; font-weight: bold; color: #666; }
 .form-item input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
 .modal-footer { text-align: right; margin-top: 30px; }
 .modal-footer button { margin-left: 10px; }
+
+.text-danger { color: #f56c6c; }
+.text-2xl { font-size: 24px; }
+.text-gray-500 { color: #909399; }
+.text-sm { font-size: 12px; }
+
+/* 自定义确认对话框样式 */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.custom-modal-content {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  width: 350px;
+  max-width: 90%;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal-header {
+  padding: 20px 20px 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-title {
+  font-size: 18px;
+  color: #333;
+  margin: 0;
+}
+
+.modal-body {
+  padding: 25px 20px;
+}
+
+.modal-footer {
+  padding: 15px 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-danger {
+  background-color: #f56c6c;
+}
+
+.btn-danger:hover {
+  background-color: #f78989;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
 </style>

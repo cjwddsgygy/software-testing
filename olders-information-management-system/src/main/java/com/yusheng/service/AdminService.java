@@ -1,11 +1,12 @@
 package com.yusheng.service;
 
 import com.yusheng.pojo.Admin;
-import com.yusheng.pojo.AdminInfo;
+// import com.yusheng.pojo.AdminInfo; // ✅ 不再需要 AdminInfo
 
 public interface AdminService {
+    // 登录方法现在直接返回 Admin 对象
+    Admin login(String account, String password); // 或者 Admin login(Admin admin);
 
-//    管理员登录
-    AdminInfo login(Admin admin);
-    Admin getById(Integer id); // <-- 新增这个方法
+    // 根据ID获取Admin信息的方法，用于JWT过滤器
+    Admin getById(Integer id);
 }

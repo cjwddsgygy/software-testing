@@ -1,4 +1,3 @@
-// 文件路径: backend/src/main/java/com/yusheng/config/SecurityConfig.java
 package com.yusheng.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,27 +17,41 @@ public class SecurityConfig {
 
     @Autowired
     private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
+    @Autowired
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    @Autowired
+    private RestfulAccessDeniedHandler restfulAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // 1. 禁用 CSRF，因为我们不使用 session
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // 2. 配置异常处理器，使用我们自定义的处理器
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        .accessDeniedHandler(restfulAccessDeniedHandler)
+                )
+
+                // 3. 基于 Token，所以不需要 Session
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // 4. 配置请求授权规则
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // ✅ 只放行真正的登录接口
+                        // 对于登录和 OPTIONS 预检请求，直接放行
                         .requestMatchers(
                                 "/admin/login",
                                 "/careWorkerLogin",
                                 "/elderLogin"
-                                // ❌ 从这里移除 "/api/elders/**"
                         ).permitAll()
-                        // ✅ 其他所有请求，包括 /elders，都需要经过认证
-                        .anyRequest().authenticated()
-                )
-                .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable);
+                        .requestMatchers(HttpMethod.OPTIONS).permitAll()
 
+                        // 其他所有请求都需要经过身份验证
+                        .anyRequest().authenticated()
+                );
+
+        // 5. 将 JWT 过滤器添加到 UsernamePasswordAuthenticationFilter 之前
         http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
