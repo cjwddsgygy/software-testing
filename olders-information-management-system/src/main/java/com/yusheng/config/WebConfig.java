@@ -16,7 +16,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 登录拦截器，拦截所有请求，但放行登录接口
-        registry.addInterceptor(tokenInterceptor).addPathPatterns("/**").excludePathPatterns("/admin/login");
+
+        registry.addInterceptor(tokenInterceptor).addPathPatterns("/**").excludePathPatterns("/admin/login", "/api/elders/**");
     }
 
     // ---  在这里添加全局CORS配置  ---

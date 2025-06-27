@@ -1,44 +1,60 @@
+// 文件路径: backend/src/main/java/com/yusheng/utils/JwtUtils.java
 package com.yusheng.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.util.StringUtils; // 确保导入了 StringUtils
 
 import java.util.Date;
 import java.util.Map;
 
 public class JwtUtils {
 
-    // 密钥（与测试类中保持一致）
+    // 使用您自己的密钥和过期时间
     private static final String SECRET_KEY = "eXVzaGVuZw==";
-
-    // 12小时的毫秒数
     private static final long EXPIRATION = 12 * 60 * 60 * 1000;
 
     /**
-     * 生成JWT令牌
-     *
-     * @param payload 要嵌入到token中的数据
-     * @return 返回生成的token字符串
+     * 生成JWT令牌 (保持不变)
      */
     public static String generateToken(Map<String, Object> payload) {
         return Jwts.builder()
-                .addClaims(payload) // 添加自定义声明
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION)) // 设置过期时间
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY) // 签名算法和密钥
-                .compact(); // 构建并返回字符串形式的token
+                .addClaims(payload)
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .compact();
     }
 
     /**
-     * 解析JWT令牌
+     * 解析JWT令牌 (这是我们修改的核心)
      *
      * @param token 需要解析的token字符串
-     * @return 返回token中的声明（payload）
+     * @return 如果token有效，返回token中的声明(payload)；如果token无效或非法，返回 null
      */
     public static Claims parseToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY) // 设置签名密钥
-                .parseClaimsJws(token) // 解析token
-                .getBody(); // 获取负载内容
+        // 1. 检查输入 token 是否为空或仅包含空白字符
+        if (!StringUtils.hasText(token)) {
+            return null; // 如果为空，直接返回 null，不抛异常
+        }
+
+        // 2. 检查 token 格式是否正确 (必须包含两个 '.')
+        if (token.split("\\.").length != 3) {
+            System.out.println("Invalid JWT format: " + token);
+            return null; // 如果格式不正确，直接返回 null，不抛异常
+        }
+
+        try {
+            // 3. 只有在通过所有前置检查后，才进行解析
+            return Jwts.parser()
+                    .setSigningKey(SECRET_KEY)
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            // 4. 如果解析过程中发生任何官方库抛出的异常 (如过期、签名错误)
+            //    在后台打印错误日志，并返回 null
+            System.out.println("JWT parsing failed. Token: " + token + ", Error: " + e.getMessage());
+            return null;
+        }
     }
 }

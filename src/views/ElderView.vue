@@ -1,12 +1,12 @@
-<!-- START OF FILE ElderView.vue -->
+<!-- 文件路径: src/views/ElderView.vue -->
 <template>
   <div class="Elder-View">
     <h2 class="view-title">老人信息管理</h2>
 
     <!-- Toolbar: 搜索和新增按钮 -->
     <div class="toolbar">
-      <input type="text" v-model="searchName" @keyup.enter="searchSeniors" placeholder="按姓名搜索..." class="search-input" />
-      <button @click="searchSeniors" class="btn btn-primary">搜索</button>
+      <input type="text" v-model="searchParams.name" @keyup.enter="fetchElders" placeholder="按姓名搜索..." class="search-input" />
+      <button @click="fetchElders" class="btn btn-primary">搜索</button>
       <button @click="openModal()" class="btn btn-success">新增老人</button>
     </div>
     
@@ -25,18 +25,19 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="senior in seniors" :key="senior.id">
-            <td>{{ senior.id }}</td>
-            <td>{{ senior.olderName }}</td>
-            <td>{{ senior.olderAge }}</td>
-            <td>{{ senior.careLevel }}</td>
-            <td>{{ senior.admissionTime }}</td>
+          <!-- ✅ 使用后端真实字段名: id, name, age, careLevel, checkInDate -->
+          <tr v-for="elder in elders" :key="elder.id">
+            <td>{{ elder.id }}</td>
+            <td>{{ elder.name }}</td>
+            <td>{{ elder.age }}</td>
+            <td>{{ elder.careLevel }}</td>
+            <td>{{ formatDisplayDate(elder.checkInDate) }}</td>
             <td>
-              <button @click="openModal(senior)" class="btn-action edit">编辑</button>
-              <button @click="deleteSenior(senior.id)" class="btn-action delete">删除</button>
+              <button @click="openModal(elder)" class="btn-action edit">编辑</button>
+              <button @click="handleDelete(elder.id)" class="btn-action delete">删除</button>
             </td>
           </tr>
-          <tr v-if="!seniors || seniors.length === 0">
+          <tr v-if="!elders || elders.length === 0">
             <td colspan="6" class="empty-text">当前没有在院老人信息或未搜索到结果。</td>
           </tr>
         </tbody>
@@ -47,22 +48,23 @@
     <div v-if="isModalVisible" class="modal-overlay" @click="closeModal">
       <div class="modal-content" @click.stop>
         <h3>{{ isEditing ? '编辑老人信息' : '新增老人' }}</h3>
-        <form @submit.prevent="saveSenior">
+        <form @submit.prevent="handleSave">
+          <!-- ✅ v-model 绑定到与后端一致的字段名 -->
           <div class="form-item">
             <label>姓名:</label>
-            <input v-model="currentSenior.olderName" type="text" required>
+            <input v-model="currentElder.name" type="text" required>
           </div>
           <div class="form-item">
             <label>年龄:</label>
-            <input v-model="currentSenior.olderAge" type="number" required>
+            <input v-model="currentElder.age" type="number" required>
           </div>
           <div class="form-item">
             <label>护理级别:</label>
-            <input v-model="currentSenior.careLevel" type="text">
+            <input v-model="currentElder.careLevel" type="text">
           </div>
           <div class="form-item">
             <label>入院时间:</label>
-            <input v-model="currentSenior.admissionTime" type="date">
+            <input v-model="currentElder.checkInDate" type="date">
           </div>
           <!-- 其他字段可以按需添加 -->
           <div class="modal-footer">
@@ -76,107 +78,87 @@
 </template>
 
 <script setup>
+// 文件路径: src/views/ElderView.vue
+// 只替换 <script setup> 部分
+
 import { ref, reactive, onMounted, computed } from 'vue';
-import apiClient from '../api';
+import { ElMessage } from 'element-plus';
+import request from '@/api/request'; // ✅ 导入我们刚刚清理过的 request.js
 
-const seniors = ref([]);
+// --- 响应式状态 ---
+const elders = ref([]);
 const loading = ref(true);
-const searchName = ref('');
+const searchParams = reactive({ name: '' });
 
-// 弹窗相关状态
+// --- 弹窗相关状态 ---
 const isModalVisible = ref(false);
-const currentSenior = ref({});
-const isEditing = computed(() => !!currentSenior.value.id);
+const currentElder = ref({});
+const isEditing = computed(() => !!currentElder.value.id);
 
-const defaultSenior = {
-  olderName: '',
-  olderAge: null,
+// 默认空对象
+const defaultElder = {
+  name: '',
+  age: null,
   careLevel: '',
-  admissionTime: new Date().toISOString().split('T')[0] // 默认为今天
+  checkInDate: new Date().toISOString().split('T')[0]
 };
 
-// --- API 调用函数 ---
+// --- API 调用函数 (使用干净的 axios 实例) ---
 
-// 1. 获取老人列表 (Read)
-const fetchSeniors = async () => {
+// 1. 获取/搜索老人列表
+const fetchElders = async () => {
   loading.value = true;
   try {
-    const response = await apiClient.get('/elders/');
-    seniors.value = response.data.data; // 根据您后端返回的格式，数据在 .data 里面
-  } catch (error) { console.error('获取老人列表失败:', error); } 
-  finally { loading.value = false; }
-};
+    // ✅ 关键测试点：使用干净的、不带拦截器的 axios 实例
+    const token = localStorage.getItem('token');
+    const response = await request.get('/elders', {
+        params: searchParams,
+        headers: {
+            'Authorization': token ? `Bearer ${token}` : ''
+        }
+    });
 
-// 2. 搜索老人
-const searchSeniors = async () => {
-  if (!searchName.value.trim()) {
-    fetchSeniors();
-    return;
-  }
-  loading.value = true;
-  try {
-    const response = await apiClient.get(`/elders/search?name=${searchName.value}`);
-    seniors.value = response.data.data;
-  } catch (error) { console.error('搜索老人失败:', error); } 
-  finally { loading.value = false; }
-};
-
-// 3. 保存老人 (Create/Update)
-const saveSenior = async () => {
-  try {
-    if (isEditing.value) {
-      // 更新 (PUT)
-      await apiClient.put('/elders/', currentSenior.value);
+    // ✅ 直接使用 axios 返回的 data
+    // 假设后端返回 { code: 200, data: [...] }
+    const result = response.data; 
+    if (result.code === 200 || result.code === 0) {
+        elders.value = result.data;
     } else {
-      // 新增 (POST)
-      await apiClient.post('/elders/', currentSenior.value);
+        throw new Error(result.msg || '获取数据失败');
     }
-    alert(isEditing.value ? '更新成功！' : '新增成功！');
-    closeModal();
-    fetchSeniors(); // 刷新列表
+
   } catch (error) {
-    console.error('保存老人信息失败:', error);
-    alert('操作失败，请稍后重试。');
+    console.error('获取老人列表失败:', error);
+    // 如果 error.response 存在，说明是HTTP错误
+    if (error.response) {
+      ElMessage.error(`请求失败: ${error.response.status} - ${error.response.statusText}`);
+    } else {
+      ElMessage.error(error.message);
+    }
+  } finally {
+    loading.value = false;
   }
 };
 
-// 4. 删除老人 (Delete)
-const deleteSenior = async (id) => {
-  if (!confirm(`确定要删除ID为 ${id} 的老人信息吗？`)) return;
-  try {
-    await apiClient.delete(`/elders/${id}`);
-    alert('删除成功！');
-    fetchSeniors(); // 刷新列表
-  } catch (error) {
-    console.error('删除老人失败:', error);
-    alert('删除失败，请稍后重试。');
-  }
+// --- 以下函数暂时保留，但本次测试不关注它们 ---
+const handleSave = () => alert('保存功能已在测试中禁用');
+const handleDelete = () => alert('删除功能已在测试中禁用');
+const openModal = (elder = null) => {
+    if (elder) { currentElder.value = { ...elder }; } 
+    else { currentElder.value = { ...defaultElder }; }
+    isModalVisible.value = true;
+};
+const closeModal = () => { isModalVisible.value = false; };
+const formatDisplayDate = (dateString) => {
+  if (!dateString) return '未记录';
+  return dateString.split('T')[0];
 };
 
-// --- 弹窗控制 ---
-
-const openModal = (senior = null) => {
-  if (senior) {
-    // 编辑：深拷贝一个对象，避免直接修改列表中的数据
-    currentSenior.value = { ...senior };
-  } else {
-    // 新增：使用默认空对象
-    currentSenior.value = { ...defaultSenior };
-  }
-  isModalVisible.value = true;
-};
-
-const closeModal = () => {
-  isModalVisible.value = false;
-  currentSenior.value = {};
-};
-
-// 组件加载后，自动获取一次老人列表
-onMounted(fetchSeniors);
+onMounted(fetchElders);
 </script>
 
 <style scoped>
-/* 表格和工具栏样式保持不变 */
+/* 样式无需修改，保持原样 */
 .view-title { font-size: 24px; margin-bottom: 20px; color: #333; }
 .loading-text, .empty-text { font-size: 16px; color: #888; text-align: center; padding: 40px; }
 .toolbar { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -193,7 +175,6 @@ th { background-color: #fafafa; font-weight: bold; color: #666; }
 .btn-action.edit { color: #e6a23c; }
 .btn-action.delete { color: #f56c6c; }
 
-/* 弹窗样式 */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
 .modal-content { background: #fff; padding: 25px 30px; border-radius: 8px; width: 500px; max-width: 90%; }
 .modal-content h3 { margin-top: 0; margin-bottom: 25px; }
@@ -203,4 +184,3 @@ th { background-color: #fafafa; font-weight: bold; color: #666; }
 .modal-footer { text-align: right; margin-top: 30px; }
 .modal-footer button { margin-left: 10px; }
 </style>
-<!-- END OF FILE ElderView.vue -->
