@@ -57,7 +57,7 @@ const handleLogin = async () => {
       
       if (token) {
         // 1. 将 Token 存储到浏览器的 localStorage 中
-        localStorage.setItem('authToken', token);
+        localStorage.setItem('token', token);
         console.log('Token 已成功保存到 localStorage');
 
         // 2. 立即为 apiClient 的后续请求设置默认头部

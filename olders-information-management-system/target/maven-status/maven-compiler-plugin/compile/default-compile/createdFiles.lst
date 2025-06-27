@@ -40,7 +40,6 @@ com\yusheng\mapper\AdminMapper.class
 com\yusheng\pojo\Bed.class
 com\yusheng\service\HealthRecordsService.class
 com\yusheng\pojo\Expense.class
-com\yusheng\interceptor\TokenInterceptor.class
 com\yusheng\service\ElderService.class
 com\yusheng\service\impl\BedsServiceImpl.class
 com\yusheng\controller\CareWorkersSelfController.class

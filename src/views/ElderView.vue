@@ -109,32 +109,27 @@ const defaultElder = {
 const fetchElders = async () => {
   loading.value = true;
   try {
-    // ✅ 关键测试点：使用干净的、不带拦截器的 axios 实例
-    const token = localStorage.getItem('token');
+    // ✅ 不再需要手动设置 headers，axios 拦截器会自动处理
     const response = await request.get('/elders', {
-        params: searchParams,
-        headers: {
-            'Authorization': token ? `Bearer ${token}` : ''
-        }
+        params: searchParams // 只传递搜索参数
     });
 
     // ✅ 直接使用 axios 返回的 data
-    // 假设后端返回 { code: 200, data: [...] }
+    // 你的后端 Result 对象是 { code, msg, data }
     const result = response.data; 
-    if (result.code === 200 || result.code === 0) {
+    
+    // 你的后端成功 code 是 1
+    if (result.code === 1) { 
         elders.value = result.data;
     } else {
+        // 响应拦截器可能已经弹出了错误，这里可以再加一层保险
         throw new Error(result.msg || '获取数据失败');
     }
 
   } catch (error) {
+    // 这里的错误大部分会被响应拦截器捕获并弹出提示，这里主要用于调试
     console.error('获取老人列表失败:', error);
-    // 如果 error.response 存在，说明是HTTP错误
-    if (error.response) {
-      ElMessage.error(`请求失败: ${error.response.status} - ${error.response.statusText}`);
-    } else {
-      ElMessage.error(error.message);
-    }
+    // ElMessage.error(error.message); // 这句可以省略，因为拦截器会处理
   } finally {
     loading.value = false;
   }

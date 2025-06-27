@@ -22,33 +22,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // 禁用 CSRF 和 session，因为我们使用 JWT
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // ✅✅✅ 核心授权逻辑，全部放在这里 ✅✅✅
                 .authorizeHttpRequests(auth -> auth
-                        // 1. 首先，无条件放行所有 OPTIONS 预检请求
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // 2. 明确列出所有需要匿名访问的路径
+                        // ✅ 只放行真正的登录接口
                         .requestMatchers(
                                 "/admin/login",
                                 "/careWorkerLogin",
-                                "/elderLogin",
-                                "/api/elders/**" // 确保老人接口在这里被放行
+                                "/elderLogin"
+                                // ❌ 从这里移除 "/api/elders/**"
                         ).permitAll()
-
-                        // 3. 除了上面明确放行的，其他所有请求都需要认证
+                        // ✅ 其他所有请求，包括 /elders，都需要经过认证
                         .anyRequest().authenticated()
                 )
-
-                // 禁用默认的登录页和 HTTP Basic 认证
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
 
-        // 将我们的 JWT 过滤器添加到认证流程中
-        // 它会在处理需要认证的请求时，解析 Token
         http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
