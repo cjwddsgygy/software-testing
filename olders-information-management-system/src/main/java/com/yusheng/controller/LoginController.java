@@ -25,7 +25,7 @@ public class LoginController {
     private ElderSelfService elderSelfService;
 
 //    管理员登录
-    @PostMapping("/adminLogin")
+    @PostMapping("/admin/login")
     public Result login(@RequestBody Admin admin) {
         AdminInfo adminInfo = adminService.login(admin);
         if (adminInfo != null) {
