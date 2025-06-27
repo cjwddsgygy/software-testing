@@ -6,30 +6,15 @@
 <mapper namespace="com.yusheng.mapper.ElderMapper">
 
 
-<!--    查询全部老人数据-->
+    <!-- 根据name查询（为空时返回所有） -->
     <select id="findAll" resultType="com.yusheng.pojo.Elder">
-        select elders_id,
-               name,
-               age,
-               birth_date,
-               ethnicity,
-               account,
-               password,
-               education,
-               marital_status,
-               hobbies,
-               care_level,
-               medical_care,
-               fee_type,
-               expenses,
-               relative_contact,
-               bed_number,
-               check_in_date,
-               check_out_date,
-               created_at,
-               updated_at
-        from elders
-        order by updated_at desc
+        select * from elders
+        <where>
+            <if test="name != null and name != ''">
+                name like concat('%', #{name}, '%')
+            </if>
+        </where>
+        order by updated_at desc <!-- 建议保留排序，保持结果一致性 -->
     </select>
 
     <select id="findUnassigned" resultType="com.yusheng.pojo.Elder">

@@ -14,6 +14,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+
         registry.addMapping("/**")
                 // ✅ 为了安全和与 allowCredentials(true) 更好地配合，明确指定前端源
                 .allowedOrigins("http://localhost:5173")
@@ -21,5 +22,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(true)
                 .maxAge(3600)
                 .allowedHeaders("*");
+
+
     }
 }

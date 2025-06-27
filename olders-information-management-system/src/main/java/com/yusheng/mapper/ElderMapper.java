@@ -9,7 +9,7 @@ import java.util.List;
 public interface ElderMapper {
 
     //    查询全部老人数据
-    List<Elder> findAll();
+    List<Elder> findAll(String name);
 
     //    查询无床位老人数据
     List<Elder> findUnassigned();

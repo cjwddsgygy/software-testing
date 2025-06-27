@@ -17,9 +17,10 @@ public class ElderServiceImpl implements ElderService {
 
 //    查询全部老人数据
     @Override
-    public List<Elder> findAll() {
-        return elderMapper.findAll();
+    public List<Elder> findAll(String name) {
+        return elderMapper.findAll(name);
     }
+
 
 //    删除老人
     @Override

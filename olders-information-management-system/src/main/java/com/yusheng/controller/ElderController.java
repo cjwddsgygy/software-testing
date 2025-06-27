@@ -17,8 +17,8 @@ public class ElderController {
 
     //    查询全部老人数据
     @GetMapping
-    public Result list() {
-        List<Elder> elderList = elderService.findAll();
+    public Result list(String name) { // ✅ 增加 String name 参数
+        List<Elder> elderList = elderService.findAll(name); // ✅ 调用 service 的新方法
         return Result.success(elderList);
     }
 

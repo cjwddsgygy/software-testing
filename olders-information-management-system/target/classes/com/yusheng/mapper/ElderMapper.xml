@@ -5,42 +5,16 @@
 
 <mapper namespace="com.yusheng.mapper.ElderMapper">
 
-    <resultMap id="ElderResultMap" type="com.yusheng.pojo.Elder">
-        <!-- ✅ 关键：明确指定主键列和属性的映射关系 -->
-        <id property="id" column="elders_id" />
 
-        <!-- 其他所有字段，如果开启了驼峰转换，它们会自动映射。如果没有，就需要全部列出来 -->
-        <result property="name" column="name"/>
-        <result property="age" column="age"/>
-        <result property="birthDate" column="birth_date"/>
-        <result property="careLevel" column="care_level"/>
-        <!-- ... 把所有下划线的字段都在这里列一遍 ... -->
-    </resultMap>
-
-<!--    查询全部老人数据-->
+    <!-- 根据name查询（为空时返回所有） -->
     <select id="findAll" resultType="com.yusheng.pojo.Elder">
-        select elders_id,
-               name,
-               age,
-               birth_date,
-               ethnicity,
-               account,
-               password,
-               education,
-               marital_status,
-               hobbies,
-               care_level,
-               medical_care,
-               fee_type,
-               expenses,
-               relative_contact,
-               bed_number,
-               check_in_date,
-               check_out_date,
-               created_at,
-               updated_at
-        from elders
-        order by updated_at desc
+        select * from elders
+        <where>
+            <if test="name != null and name != ''">
+                name like concat('%', #{name}, '%')
+            </if>
+        </where>
+        order by updated_at desc <!-- 建议保留排序，保持结果一致性 -->
     </select>
 
     <select id="findUnassigned" resultType="com.yusheng.pojo.Elder">

@@ -7,7 +7,7 @@ import java.util.List;
 public interface ElderService {
 
     //    查询全部老人数据
-    List<Elder> findAll();
+    List<Elder> findAll(String name);
 
     //    删除老人
     void deleteById(Integer id);
