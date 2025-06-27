@@ -46,9 +46,13 @@ const handleLogin = async () => {
       password: form.password
     });
 
+
+  // --- 关键调试代码 ---
+  console.log('后端返回的完整数据:', response.data); 
+  // --------------------
     // 假设后端成功时返回的数据结构包含一个 code 字段
     // 请根据你后端实际返回的数据结构来判断是否登录成功
-    if (response.data.code === '200') { // 假设 code '200' 表示成功
+    if (response.data.code === 1) { //  code '1' 表示成功
       console.log('登录成功:', response.data);
       // 可以在此保存 token 等用户信息
       // localStorage.setItem('token', response.data.data.token);
