@@ -4,6 +4,7 @@ com\yusheng\pojo\AdminInfo.class
 com\yusheng\mapper\CareWorkersMapper.class
 com\yusheng\utils\JwtUtils.class
 com\yusheng\controller\CareWorkersController.class
+com\yusheng\config\JwtAuthenticationTokenFilter.class
 com\yusheng\pojo\CareWorker.class
 com\yusheng\service\impl\HealthRecordsServiceImpl.class
 com\yusheng\service\ElderSelfService.class

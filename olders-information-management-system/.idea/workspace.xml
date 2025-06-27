@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b79fa722-21b9-409a-9529-a4477ef423b8" name="更改" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/yusheng/config/JwtAuthenticationTokenFilter.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/main/java/com/yusheng/config/SecurityConfig.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../software-testing-project/.idea/.gitignore" beforeDir="false" />
@@ -230,7 +231,7 @@
       <workItem from="1750954243853" duration="2040000" />
       <workItem from="1750979517732" duration="2573000" />
       <workItem from="1750982117952" duration="941000" />
-      <workItem from="1750986411011" duration="9119000" />
+      <workItem from="1750986411011" duration="11061000" />
     </task>
     <servers />
   </component>

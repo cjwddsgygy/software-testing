@@ -7,4 +7,5 @@ public interface AdminService {
 
 //    管理员登录
     AdminInfo login(Admin admin);
+    Admin getById(Integer id); // <-- 新增这个方法
 }

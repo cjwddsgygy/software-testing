@@ -1,15 +1,15 @@
 package com.yusheng.service.impl;
 
-        import com.yusheng.mapper.AdminMapper;
-        import com.yusheng.pojo.Admin;
-        import com.yusheng.pojo.AdminInfo;
-        import com.yusheng.service.AdminService;
-        import com.yusheng.utils.JwtUtils;
-        import org.springframework.beans.factory.annotation.Autowired;
-        import org.springframework.stereotype.Service;
+import com.yusheng.mapper.AdminMapper;
+import com.yusheng.pojo.Admin;
+import com.yusheng.pojo.AdminInfo;
+import com.yusheng.service.AdminService;
+import com.yusheng.utils.JwtUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-        import java.util.HashMap;
-        import java.util.Map;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -37,5 +37,9 @@ public class AdminServiceImpl implements AdminService {
 
 //        3.不存在，返回null
         return null;
+    }
+    @Override // <-- 实现新增的方法
+    public Admin getById(Integer id) {
+        return adminMapper.selectById(id);
     }
 }

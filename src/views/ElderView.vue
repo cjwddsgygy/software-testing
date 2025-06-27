@@ -1,6 +1,6 @@
-<!-- START OF FILE OlderManagement.vue -->
+<!-- START OF FILE ElderView.vue -->
 <template>
-  <div class="older-management-view">
+  <div class="Elder-View">
     <h2 class="view-title">老人信息管理</h2>
 
     <!-- Toolbar: 搜索和新增按钮 -->
@@ -203,4 +203,4 @@ th { background-color: #fafafa; font-weight: bold; color: #666; }
 .modal-footer { text-align: right; margin-top: 30px; }
 .modal-footer button { margin-left: 10px; }
 </style>
-<!-- END OF FILE OlderManagement.vue -->
+<!-- END OF FILE ElderView.vue -->
