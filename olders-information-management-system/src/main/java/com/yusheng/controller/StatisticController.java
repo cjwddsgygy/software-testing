@@ -1,6 +1,6 @@
 package com.yusheng.controller;
 
-import com.yusheng.common.Result; // 导入您项目中的 Result 类
+import com.yusheng.pojo.Result; // 导入您项目中的 Result 类
 import com.yusheng.dto.HomeViewStatsDto;
 import com.yusheng.service.StatisticService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/stats") // 与其他控制器保持一致的基础路径
+@RequestMapping("/api") // 与其他控制器保持一致的基础路径
 public class StatisticController {
 
     @Autowired

@@ -13,4 +13,7 @@ public interface CareWorkersSelfService {
 
 //    护工登录
     CareWorkerInfo login(CareWorker careWorker);
+
+    // **新增这个方法声明**
+    CareWorkerInfo getById(Integer id);
 }

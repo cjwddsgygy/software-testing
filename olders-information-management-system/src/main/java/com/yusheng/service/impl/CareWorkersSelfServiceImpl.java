@@ -47,4 +47,12 @@ public class CareWorkersSelfServiceImpl implements CareWorkersSelfService {
         }
         return null;
     }
+
+    // **新增这个方法的实现**
+    @Override
+    public CareWorkerInfo getById(Integer id) {
+        // 调用 Mapper 从数据库根据 ID 查询护工信息
+        return careWorkersSelfMapper.selectById(id); // 假设您的 Mapper 有 selectById 方法
+    }
+
 }

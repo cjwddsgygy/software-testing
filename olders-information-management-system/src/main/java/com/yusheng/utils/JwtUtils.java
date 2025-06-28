@@ -11,23 +11,33 @@ import java.util.Map;
 
 public class JwtUtils {
 
-    // 使用您自己的密钥和过期时间
+    // 密钥 (保持不变)
     private static final String SECRET_KEY = "eXVzaGVuZw==";
-    private static final long EXPIRATION = 12 * 60 * 60 * 1000;
+
+    // 过期时间常量，现在可以不再用于生成Token，但您代码中可能仍有用到，所以可以保留
+    // 或者直接删除，取决于您其他地方是否依赖这个常量
+    // private static final long EXPIRATION = 12 * 60 * 60 * 1000; // 12小时
 
     /**
-     * 生成JWT令牌 (保持不变)
+     * 生成JWT令牌 (核心修改在这里：不设置过期时间)
+     *
+     * @param payload Token中需要包含的声明信息
+     * @return 生成的JWT令牌字符串
+     *
+     * ⚠️ 安全警告：不设置过期时间的Token存在巨大安全风险，如果Token泄露，将永远有效。
+     *              在生产环境中强烈建议设置合理的过期时间，并结合刷新机制。
      */
     public static String generateToken(Map<String, Object> payload) {
         return Jwts.builder()
-                .addClaims(payload)
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .addClaims(payload) // 添加载荷
+                // .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION)) // <<--- 注释或删除此行，以实现永不过期
+                .setIssuedAt(new Date()) // 设置签发时间，推荐保留
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY) // 签名算法和密钥
                 .compact();
     }
 
     /**
-     * 解析JWT令牌 (这是我们修改的核心)
+     * 解析JWT令牌 (保持不变，因为您的现有实现已经很完善)
      *
      * @param token 需要解析的token字符串
      * @return 如果token有效，返回token中的声明(payload)；如果token无效或非法，返回 null

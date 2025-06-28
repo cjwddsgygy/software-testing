@@ -10,6 +10,12 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -25,35 +31,52 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // 1. 禁用 CSRF，因为我们不使用 session
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-
-                // 2. 配置异常处理器，使用我们自定义的处理器
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                         .accessDeniedHandler(restfulAccessDeniedHandler)
                 )
-
-                // 3. 基于 Token，所以不需要 Session
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // 4. 配置请求授权规则
                 .authorizeHttpRequests(auth -> auth
-                        // 对于登录和 OPTIONS 预检请求，直接放行
+                        // 登录请求，放行
                         .requestMatchers(
-                                "/admin/login",
-                                "/careWorkerLogin",
-                                "/elderLogin"
+                                "/api/adminLogin",
+                                "/api/careWorkerLogin",
+                                "/api/elderLogin"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS).permitAll()
 
-                        // 其他所有请求都需要经过身份验证
+                        // OPTIONS 预检请求，放行
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // ==========================================================
+                        // ===              【！！！临时诊断！！！】              ===
+                        // === 我们暂时允许所有 POST, PUT, DELETE 请求匿名访问     ===
+                        // ==========================================================
+                        .requestMatchers(HttpMethod.POST, "/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/**").permitAll()
+
+                        // 其他所有请求（主要是GET）仍然需要认证
                         .anyRequest().authenticated()
                 );
 
-        // 5. 将 JWT 过滤器添加到 UsernamePasswordAuthenticationFilter 之前
         http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

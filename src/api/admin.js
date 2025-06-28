@@ -1,6 +1,6 @@
 // 文件路径: src/api/admin.js
 
-import request from './request';
+import request from './request'; // 确保这里导入的是 src/api/request.js 的默认导出 apiClient
 
 /**
  * 管理员登录接口
@@ -8,8 +8,8 @@ import request from './request';
  */
 export const loginAPI = (data) => {
     return request({
-        // ✅ 修改 url，使其与后端的登录接口路径完全匹配
-        url: '/admin/login',
+        // ✅ 核心修改：确保 URL 与后端 UserController 路径完全匹配
+        url: '/api/adminLogin', 
         method: 'POST',
         data // POST 请求的数据放在 data 字段
     });

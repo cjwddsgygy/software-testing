@@ -2,15 +2,15 @@
 <template>
   <div class="dashboard-view">
     <aside class="sidebar">
-      <h1 class="system-title">管理系统</h1>
+      <h1 class="system-title">智能养老院管理系统</h1>
       <nav class="nav-menu">
         <ul>
           <li><router-link to="/dashboard/home">首页</router-link></li>
           <li><router-link to="/dashboard/careworkers">护工信息管理</router-link></li>
           <li><router-link to="/dashboard/elders">老人信息管理</router-link></li>
-          <li><router-link to="/dashboard/beds">床位管理</router-link></li>
-          <li><router-link to="/dashboard/expenses">消费记录管理</router-link></li> <!-- 新增 -->
-          <li><router-link to="/dashboard/health-records">健康管理</router-link></li> <!-- 新增 -->
+          <li><router-link to="/dashboard/beds">床位信息管理</router-link></li>
+          <li><router-link to="/dashboard/expenses">消费记录管理</router-link></li>
+          <li><router-link to="/dashboard/health-records">健康数据管理</router-link></li>
           <li><router-link to="/dashboard/settings">系统设置</router-link></li>
         </ul>
       </nav>
@@ -24,21 +24,25 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import { ElMessage } from 'element-plus'; // 假设需要Element Plus的提示
+import { ElMessage } from 'element-plus';
+import { useAuthStore } from '@/stores/auth'; // 导入 auth store
 
 const router = useRouter();
+const authStore = useAuthStore(); // 获取 store 实例
 
 const logout = () => {
-  // 模拟退出登录逻辑
   console.log('用户退出登录');
+  
+  // ✅ 核心修改：调用 authStore 的 logout action 来处理所有清除逻辑
+  authStore.logout(); 
+  
   ElMessage.success('您已成功退出登录！');
-  // 实际项目中可能需要清除token，并重定向到登录页
-  localStorage.removeItem('token'); // 清除token
-  router.push('/login'); // 跳转到登录页
+  router.push('/login');
 };
 </script>
 
 <style scoped>
+/* 样式保持不变 */
 .dashboard-view {
   display: flex;
   height: 100vh;

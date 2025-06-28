@@ -1,82 +1,104 @@
-// src/main/java/com/yusheng/controller/BedsController.java
 package com.yusheng.controller;
 
 import com.yusheng.pojo.Bed;
-import com.yusheng.pojo.Elder; // *** 导入 Elder POJO ***
-import com.yusheng.pojo.Result;
-import com.yusheng.service.BedsService;
-import com.yusheng.service.ElderService; // *** 注入 EldersService ***
+import com.yusheng.pojo.Result; // 确保你有这个通用的Result类
+import com.yusheng.repository.BedRepository; // 注入JPA的Repository
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-@RequestMapping("/beds")
+@RequestMapping("/api/beds")
 @RestController
 public class BedsController {
 
     @Autowired
-    private BedsService bedsService;
-
-    @Autowired
-    private ElderService elderService; // *** 注入EldersService，用于查询老人信息 ***
+    private BedRepository bedRepository; // 直接注入Repository
 
     /**
-     * 查询床位列表 (已升级为支持分页和条件查询)
-     * @param status 状态 (空闲, 已入住, 维修中)
-     * @param search 床位号关键字
-     * @return 床位列表
+     * 查询床位列表，支持按关键字搜索
      */
     @GetMapping
-    public Result list(
-            @RequestParam(defaultValue = "") String status,
-            @RequestParam(defaultValue = "") String search) {
-        List<Bed> bedList = bedsService.findPage(status, search);
+    public Result list(@RequestParam(required = false) String searchTerm) {
+        List<Bed> bedList;
+        if (StringUtils.hasText(searchTerm)) {
+            // 如果有搜索词，调用自定义的查询方法
+            bedList = bedRepository.findBySearchTerm(searchTerm);
+        } else {
+            // 如果没有搜索词，查询全部并排序
+            bedList = bedRepository.findAll(Sort.by("roomNumber", "bedNumber"));
+        }
         return Result.success(bedList);
     }
 
-    //    删除床位 (参数类型改为 Integer)
-    @DeleteMapping("/{id}") // *** 改为路径变量，更符合RESTful风格 ***
-    public Result delete(@PathVariable Integer id) {
-        bedsService.deleteById(id);
-        return Result.success();
-    }
-
-    //    新增床位
+    /**
+     * 新增床位
+     */
     @PostMapping
     public Result save(@RequestBody Bed bed) {
-        // 新增时设置创建和更新时间
         bed.setCreatedAt(LocalDateTime.now());
         bed.setUpdatedAt(LocalDateTime.now());
-        bedsService.save(bed);
-        return Result.success();
+        Bed savedBed = bedRepository.save(bed);
+        return Result.success(savedBed);
     }
 
-    //    根据ID查询床位信息
-    @GetMapping("/{id}")
-    public Result getInfo(@PathVariable Integer id) {
-        Bed bed = bedsService.getInfo(id);
-        return Result.success(bed);
-    }
-
-    //    修改床位
+    /**
+     * 修改床位
+     */
     @PutMapping
     public Result update(@RequestBody Bed bed) {
-        // 修改时只更新 `updatedAt`
+        // 检查床位是否存在
+        if (bed.getId() == null || !bedRepository.existsById(bed.getId())) {
+            return Result.error("404", "找不到要更新的床位");
+        }
         bed.setUpdatedAt(LocalDateTime.now());
-        bedsService.update(bed);
+        Bed updatedBed = bedRepository.save(bed); // save方法同时用于新增和更新
+        return Result.success(updatedBed);
+    }
+
+    /**
+     * 删除床位
+     */
+    @DeleteMapping("/{id}")
+    public Result delete(@PathVariable Integer id) {
+        if (!bedRepository.existsById(id)) {
+            return Result.error("404", "找不到要删除的床位");
+        }
+        bedRepository.deleteById(id);
         return Result.success();
     }
 
     /**
-     * *** 新增接口：获取所有未入住的老人列表 ***
-     * (用于前端“办理入住”的下拉框)
-     * @return 未分配床位的老人列表
+     * 办理退住
      */
-    @GetMapping("/unassigned-elders")
-    public Result getUnassignedElders() {
-        List<Elder> elders = elderService.findUnassigned();
-        return Result.success(elders);
+    @PutMapping("/{id}/checkout")
+    public Result checkout(@PathVariable Integer id) {
+        Optional<Bed> optionalBed = bedRepository.findById(id);
+        if (optionalBed.isEmpty()) {
+            return Result.error("404", "找不到要办理退住的床位");
+        }
+
+        Bed bed = optionalBed.get();
+        bed.setStatus("空闲");
+        bed.setEldersId(null);
+        bed.setName(null);
+        bed.setUpdatedAt(LocalDateTime.now());
+
+        bedRepository.save(bed);
+        return Result.success();
+    }
+
+    /**
+     * 根据ID获取单个床位信息 (可选，主要用于调试)
+     */
+    @GetMapping("/{id}")
+    public Result getInfo(@PathVariable Integer id) {
+        return bedRepository.findById(id)
+                .map(Result::success)
+                .orElse(Result.error("404", "未找到ID为 " + id + " 的床位"));
     }
 }

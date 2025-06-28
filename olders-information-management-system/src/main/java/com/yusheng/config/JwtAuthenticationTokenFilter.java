@@ -2,7 +2,12 @@
 package com.yusheng.config;
 
 import com.yusheng.pojo.Admin;
+import com.yusheng.pojo.CareWorkerInfo; // 假设您有这个类
+import com.yusheng.pojo.ElderInfo;   // 假设您有这个类
+import com.yusheng.pojo.LoginUser;
 import com.yusheng.service.AdminService;
+import com.yusheng.service.CareWorkersSelfService; // 注入护工服务
+import com.yusheng.service.ElderSelfService;       // 注入老人服务
 import com.yusheng.utils.JwtUtils;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -12,78 +17,94 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     @Autowired
     private AdminService adminService;
+    @Autowired
+    private CareWorkersSelfService careWorkersSelfService;
+    @Autowired
+    private ElderSelfService elderSelfService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        // 我们只对非登录请求进行处理
-        if (request.getRequestURI().equals("/admin/login")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         String authHeader = request.getHeader("Authorization");
 
-        System.out.println("\n\n<<<<<<<<<<<<<<<<<< JWT FILTER DEBUG START >>>>>>>>>>>>>>>>>>");
-        System.out.println("REQUEST URI: " + request.getRequestURI());
-        System.out.println("AUTHORIZATION HEADER: " + authHeader);
+        // (DEBUG 日志保持不变, 用于观察)
 
         if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
             String jwt = authHeader.substring(7);
-            System.out.println("  [Step 1] Extracted JWT: " + jwt);
-
             Claims claims = JwtUtils.parseToken(jwt);
 
-            if (claims != null) {
-                System.out.println("  [Step 2] SUCCESS: JWT parsing successful.");
-                System.out.println("     Claims content: " + claims.toString());
+            if (claims != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                Integer userId = claims.get("id", Integer.class);
+                String userType = claims.get("userType", String.class);
 
-                if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                    System.out.println("  [Step 3] INFO: SecurityContext is empty, proceeding with authentication.");
+                if (userId != null && StringUtils.hasText(userType)) {
+                    LoginUser loginUser = loadUser(userId, userType);
 
-                    Integer adminId = claims.get("id", Integer.class);
-                    String account = claims.get("account", String.class);
-
-                    System.out.println("     [DEBUG] Claim 'id' value: " + adminId);
-                    System.out.println("     [DEBUG] Claim 'account' value: " + account);
-
-                    if (adminId != null && StringUtils.hasText(account)) {
-                        UserDetails userDetails = new User(account, "", new ArrayList<>());
+                    if (loginUser != null) {
                         UsernamePasswordAuthenticationToken authenticationToken =
-                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
                         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
                         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                        System.out.println("  [Step 4] SUCCESS: Authentication object set in SecurityContext for user: " + account);
-                    } else {
-                        System.out.println("  [Step 4] FAILURE: 'id' or 'account' claim is missing from token.");
                     }
-                } else {
-                    System.out.println("  [Step 3] INFO: SecurityContext already contains an Authentication object. Skipping.");
                 }
-            } else {
-                System.out.println("  [Step 2] FAILURE: JWT parsing returned NULL. Token is likely invalid, expired, or signature does not match.");
             }
-        } else {
-            System.out.println("  [Step 1] INFO: No Bearer token found in request.");
         }
 
-        System.out.println("<<<<<<<<<<<<<<<<<<< JWT FILTER DEBUG END >>>>>>>>>>>>>>>>>\n\n");
-
         filterChain.doFilter(request, response);
+    }
+
+    /**
+     * 根据用户ID和用户类型，加载真实的用户信息并包装成 LoginUser
+     */
+    private LoginUser loadUser(Integer userId, String userType) {
+        Object principalUser = null;
+        List<String> permissions = Collections.emptyList(); // 默认为空权限
+
+        switch (userType) {
+            case "ADMIN":
+                Admin admin = adminService.getById(userId);
+                if (admin != null) {
+                    principalUser = admin;
+                    // 为管理员赋予所有权限的象征
+                    permissions = List.of("ROLE_ADMIN", "user:read", "user:write");
+                }
+                break;
+            case "CARE_WORKER":
+                CareWorkerInfo careWorker = careWorkersSelfService.getById(userId); // 假设有这个方法
+                if (careWorker != null) {
+                    principalUser = careWorker;
+                    permissions = List.of("ROLE_CARE_WORKER", "user:read");
+                }
+                break;
+            case "ELDER":
+                ElderInfo elder = elderSelfService.getById(userId); // 假设有这个方法
+                if (elder != null) {
+                    principalUser = elder;
+                    permissions = List.of("ROLE_ELDER", "user:self:read");
+                }
+                break;
+            default:
+                // 未知用户类型，直接返回 null
+                return null;
+        }
+
+        if (principalUser != null) {
+            return new LoginUser(principalUser, permissions);
+        }
+
+        return null;
     }
 }

@@ -10,11 +10,25 @@ const apiClient = axios.create({
   timeout: 10000,
 });
 
-// ✅✅✅ 核心修改：添加请求拦截器 ✅✅✅
+// ✅ 添加请求拦截器
 apiClient.interceptors.request.use(
   (config) => {
-    // 1. 在每个请求发送出去之前，从 localStorage 中获取 token
-    const token = localStorage.getItem('token'); 
+    // 1. 在每个请求发送出去之前，从 localStorage 中获取 'auth' 数据
+    const authDataStr = localStorage.getItem('auth');
+    let token = null;
+
+    if (authDataStr) {
+      try {
+        const authData = JSON.parse(authDataStr);
+        // 假设您的 token 字段名是 'token'
+        token = authData.token; 
+      } catch (e) {
+        console.error("Error parsing 'auth' data from localStorage:", e);
+        // 如果解析失败，可能是数据损坏，此时可以考虑清除本地存储并强制登录
+        localStorage.removeItem('auth');
+        router.push('/login');
+      }
+    }
     
     // 2. 如果 token 存在，则为这个请求的请求头添加 Authorization 字段
     if (token) {
@@ -25,18 +39,16 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
-    // 对请求错误做些什么
     console.error('Request Interceptor Error:', error);
     return Promise.reject(error);
   }
 );
 
 
-// ✅ 同样重要的是：添加响应拦截器，统一处理错误
+// ✅ 添加响应拦截器，统一处理错误
 apiClient.interceptors.response.use(
   (response) => {
     // 成功响应 (HTTP 状态码为 2xx)
-    // 如果后端有业务错误码，可以在这里判断
     if (response.data && response.data.code !== 0) {
       ElMessage.error(response.data.msg || '操作失败');
       return Promise.reject(new Error(response.data.msg));
@@ -44,15 +56,14 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    // 失败响应 (HTTP 状态码不是 2xx)
     console.error('Response Interceptor Error:', error.response);
     
     if (error.response) {
       switch (error.response.status) {
         case 401:
           ElMessage.error('认证失败或登录已过期，请重新登录');
-          // 清理本地 token，并跳转到登录页
-          localStorage.removeItem('token'); 
+          // ✅ 核心修改：清理本地 'auth' 键
+          localStorage.removeItem('auth'); 
           router.push('/login');
           break;
         case 403:

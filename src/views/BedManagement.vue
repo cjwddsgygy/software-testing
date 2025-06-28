@@ -1,4 +1,3 @@
-<!-- 文件路径: src/views/BedManagement.vue -->
 <template>
   <div class="bed-management-view">
     <h2 class="view-title">床位管理</h2>
@@ -16,8 +15,8 @@
       <div v-if="!beds || beds.length === 0" class="empty-text">没有找到符合条件的床位。</div>
       <div v-else class="bed-grid">
         <div v-for="bed in beds" :key="bed.id" class="bed-card" @click="openDetailModal(bed)">
-          <div class="bed-number">{{ bed.bedNumber }}</div>
-          <div class="elder-name">{{ bed.elderName || '(空闲)' }}</div>
+          <div class="bed-number" :class="{ 'status-occupied': bed.status === '占用', 'status-vacant': bed.status === '空闲' }">{{ bed.bedNumber }}</div>
+          <div class="elder-name">{{ bed.status === '占用' ? bed.name : '(空闲)' }}</div>
         </div>
       </div>
     </div>
@@ -25,31 +24,45 @@
     <!-- 新增/编辑床位弹窗 -->
     <div v-if="isAddEditModalVisible" class="modal-overlay" @click="closeAddEditModal">
       <div class="modal-content" @click.stop>
-        <h3>{{ isEditing ? '编辑床位信息' : '新增床位' }}</h3>
+        <div class="modal-header">
+          <h3 class="modal-title">{{ isEditing ? '编辑床位信息' : '新增床位' }}</h3>
+          <button type="button" class="close-btn" @click="closeAddEditModal">×</button>
+        </div>
         <form @submit.prevent="handleSaveBed">
-          <div class="form-item">
-            <label>床位号:</label>
-            <input v-model="currentBed.bedNumber" type="text" required />
-          </div>
-          <div class="form-item">
-            <label>楼层:</label>
-            <input v-model="currentBed.floor" type="text" />
-          </div>
-          <div class="form-item">
-            <label>房间号:</label>
-            <input v-model="currentBed.roomNumber" type="text" />
-          </div>
-          <div class="form-item">
-            <label>状态:</label>
-            <select v-model="currentBed.status" required>
-              <option value="空闲">空闲</option>
-              <option value="已入住">已入住</option>
-              <option value="维护中">维护中</option>
-            </select>
-          </div>
-          <div class="form-item" v-if="currentBed.status === '已入住'">
-            <label>入住老人姓名:</label>
-            <input v-model="currentBed.elderName" type="text" placeholder="若已入住，请输入老人姓名" />
+          <div class="form-content">
+            <div class="form-grid">
+              <div class="form-item">
+                <label>床位号:</label>
+                <input v-model="currentBed.bedNumber" type="text" required />
+              </div>
+              <div class="form-item">
+                <label>房间号:</label>
+                <input v-model="currentBed.roomNumber" type="text" required/>
+              </div>
+              <div class="form-item">
+                <label>状态:</label>
+                <select v-model="currentBed.status" required>
+                  <option value="空闲">空闲</option>
+                  <option value="占用">占用</option>
+                </select>
+              </div>
+            </div>
+            <div v-if="currentBed.status === '占用'" class="required-section">
+              <div class="form-grid">
+                <div class="form-item">
+                  <label>入住老人ID:</label>
+                  <input v-model="currentBed.eldersId" type="number" placeholder="请输入入住老人ID" required/>
+                </div>
+                <div class="form-item">
+                  <label>入住老人姓名:</label>
+                  <input v-model="currentBed.name" type="text" placeholder="请输入入住老人姓名" required/>
+                </div>
+              </div>
+            </div>
+            <div class="form-item">
+              <label>描述/备注:</label>
+              <textarea v-model="currentBed.description" rows="3" placeholder="可输入床位描述或备注信息"></textarea>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" @click="closeAddEditModal" class="btn btn-secondary">取消</button>
@@ -62,116 +75,100 @@
     <!-- 床位详情弹窗 -->
     <div v-if="isDetailModalVisible" class="modal-overlay" @click="closeDetailModal">
       <div class="modal-content detail-modal" @click.stop>
-        <h3>床位详情 ({{ currentBed.bedNumber }})</h3>
-        <div v-if="currentBed" class="detail-grid">
-          <div class="detail-item"><strong>床位ID:</strong><span>{{ currentBed.id }}</span></div>
-          <div class="detail-item"><strong>床位号:</strong><span>{{ currentBed.bedNumber }}</span></div>
-          <div class="detail-item"><strong>楼层:</strong><span>{{ currentBed.floor || 'N/A' }}</span></div>
-          <div class="detail-item"><strong>房间号:</strong><span>{{ currentBed.roomNumber || 'N/A' }}</span></div>
-          <div class="detail-item"><strong>当前状态:</strong><span>{{ currentBed.status }}</span></div>
-          <div class="detail-item full-width" v-if="currentBed.status === '已入住'">
-            <strong>当前入住人:</strong><span>{{ currentBed.elderName }}</span>
-          </div>
-          <div class="detail-item full-width">
-            <strong>描述/备注:</strong><span>{{ currentBed.description || '无' }}</span>
+        <div class="modal-header">
+          <h3 class="modal-title">床位详情 ({{ detailBed.bedNumber }})</h3>
+          <button type="button" class="close-btn" @click="closeDetailModal">×</button>
+        </div>
+        <div class="detail-content">
+          <div class="detail-grid">
+            <div class="detail-item"><strong>床位ID:</strong><span>{{ detailBed.id }}</span></div>
+            <div class="detail-item"><strong>床位号:</strong><span>{{ detailBed.bedNumber }}</span></div>
+            <div class="detail-item"><strong>房间号:</strong><span>{{ detailBed.roomNumber || 'N/A' }}</span></div>
+            <div class="detail-item"><strong>当前状态:</strong><span>{{ detailBed.status }}</span></div>
+            <div class="detail-item" v-if="detailBed.status === '占用'">
+              <strong>当前入住人:</strong><span>{{ detailBed.name }}</span>
+            </div>
+            <div class="detail-item" v-if="detailBed.status === '占用'">
+              <strong>入住人ID:</strong><span>{{ detailBed.eldersId }}</span>
+            </div>
+            <div class="detail-item full-width"><strong>创建时间:</strong><span>{{ formatDate(detailBed.createdAt) }}</span></div>
+            <div class="detail-item full-width"><strong>最后更新:</strong><span>{{ formatDate(detailBed.updatedAt) }}</span></div>
           </div>
         </div>
-
-        <div class="modal-footer mt-4">
-          <button type="button" @click="openAddEditModal(currentBed)" class="btn btn-primary">编辑此床位</button>
-          <button type="button" @click="confirmCheckout(currentBed.id)" v-if="currentBed.status === '已入住'" class="btn btn-info">办理退住</button>
-          <button type="button" @click="confirmDeleteBed(currentBed.id)" class="btn btn-danger">删除此床位</button>
+        <div class="modal-footer">
+          <button type="button" @click="handleEditFromDetail(detailBed)" class="btn btn-primary">编辑此床位</button>
+          <button type="button" @click="confirmCheckout(detailBed)" v-if="detailBed.status === '占用'" class="btn btn-info">办理退住</button>
+          <button type="button" @click="confirmDeleteBed(detailBed)" class="btn btn-danger">删除此床位</button>
           <button type="button" @click="closeDetailModal" class="btn btn-secondary">关闭</button>
         </div>
       </div>
     </div>
 
-    <!-- 办理退住确认弹窗 -->
-    <div v-if="isConfirmCheckoutVisible" class="custom-modal-overlay" @click="isConfirmCheckoutVisible = false">
+    <!-- 确认操作弹窗 (通用) -->
+    <div v-if="isConfirmModalVisible" class="custom-modal-overlay" @click="closeConfirmModal">
       <div class="custom-modal-content" @click.stop>
         <div class="modal-header">
-          <h3 class="modal-title">确认办理退住</h3>
+          <h3 class="modal-title">{{ confirmModal.title }}</h3>
         </div>
         <div class="modal-body text-center">
-          <i class="el-icon-warning-outline text-info text-2xl mb-4"></i>
-          <p>您要为床位 <strong>{{ currentBed.bedNumber }}</strong> 上的老人办理退住吗？</p>
-          <p class="text-sm text-gray-500 mt-2">此操作会将床位状态设置为空闲，并清空入住人信息。</p>
+          <p v-html="confirmModal.message"></p>
+          <p class="text-sm text-gray-500 mt-2">{{ confirmModal.note }}</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" @click="isConfirmCheckoutVisible = false">取消</button>
-          <button type="button" class="btn btn-primary" @click="handleCheckout">确认退住</button>
+          <button type="button" class="btn btn-secondary" @click="closeConfirmModal">取消</button>
+          <button type="button" :class="confirmModal.confirmButtonClass" @click="confirmModal.onConfirm">确认</button>
         </div>
       </div>
     </div>
-
-    <!-- 删除确认弹窗 -->
-    <div v-if="isDeleteBedVisible" class="custom-modal-overlay" @click="isDeleteBedVisible = false">
-      <div class="custom-modal-content" @click.stop>
-        <div class="modal-header">
-          <h3 class="modal-title">确认删除床位</h3>
-        </div>
-        <div class="modal-body text-center">
-          <i class="el-icon-warning-outline text-danger text-2xl mb-4"></i>
-          <p>您确定要删除床位 <strong>{{ currentBed.bedNumber }}</strong> 吗？</p>
-          <p class="text-sm text-gray-500 mt-2">此操作将永久删除该床位信息，且无法恢复。</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" @click="isDeleteBedVisible = false">取消</button>
-          <button type="button" class="btn btn-danger" @click="handleDeleteBed">确认删除</button>
-        </div>
-      </div>
-    </div>
-
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import { ElMessage } from 'element-plus';
-import apiClient from '@/api/request'; // 假设您的API请求工具
+import apiClient from '@/api/request';
 
 // --- 响应式状态 ---
 const beds = ref([]);
 const loading = ref(true);
-const searchParams = reactive({
-  searchTerm: ''
-});
+const searchParams = reactive({ searchTerm: '' });
 const isAddEditModalVisible = ref(false);
 const currentBed = ref({});
 const isEditing = ref(false);
 const isDetailModalVisible = ref(false);
-const isConfirmCheckoutVisible = ref(false);
-const isDeleteBedVisible = ref(false);
+const detailBed = ref({}); // 专门用于详情展示的数据，避免污染
 
-// --- API 调用函数 ---
+// --- 通用确认弹窗状态 ---
+const isConfirmModalVisible = ref(false);
+const confirmModal = reactive({
+  title: '',
+  message: '',
+  note: '',
+  confirmButtonClass: 'btn btn-primary',
+  onConfirm: () => {}
+});
+
+// --- 工具函数 ---
+const formatDate = (dateStr) => {
+  if (!dateStr) return 'N/A';
+  const date = new Date(dateStr);
+  return date.toLocaleString();
+};
+
+// --- API 调用 ---
 const fetchBeds = async () => {
   loading.value = true;
   try {
-    // 模拟API请求
-    const response = await new Promise(resolve => {
-      setTimeout(() => {
-        const mockData = [
-          { id: 1, bedNumber: 'A101', floor: '1F', roomNumber: '101', status: '已入住', elderName: '张三丰', description: '靠窗，带独立卫生间' },
-          { id: 2, bedNumber: 'A102', floor: '1F', roomNumber: '101', status: '空闲', elderName: null, description: '靠窗' },
-          { id: 3, bedNumber: 'B201', floor: '2F', roomNumber: '201', status: '已入住', elderName: '李莫愁', description: '朝南' },
-          { id: 4, bedNumber: 'B202', floor: '2F', roomNumber: '201', status: '维护中', elderName: null, description: '空调维修中' },
-          { id: 5, bedNumber: 'C301', floor: '3F', roomNumber: '301', status: '空闲', elderName: null, description: '视野好' },
-        ];
-        const filteredData = mockData.filter(bed =>
-          (bed.bedNumber && bed.bedNumber.includes(searchParams.searchTerm)) ||
-          (bed.elderName && bed.elderName.includes(searchParams.searchTerm))
-        );
-        resolve({ data: { code: 0, data: filteredData } });
-      }, 500);
+    const response = await apiClient.get('/api/beds', {
+      params: { searchTerm: searchParams.searchTerm }
     });
-
     if (response.data.code === 0) {
       beds.value = response.data.data;
     } else {
       throw new Error(response.data.msg || '获取床位信息失败');
     }
   } catch (error) {
-    ElMessage.error(error.message || '网络错误，获取床位信息失败');
+    ElMessage.error(error.message || '网络错误，请检查后端服务');
   } finally {
     loading.value = false;
   }
@@ -179,96 +176,64 @@ const fetchBeds = async () => {
 
 const handleSaveBed = async () => {
   try {
-    if (!currentBed.value.bedNumber || !currentBed.value.status) {
-      ElMessage.error('请填写床位号和状态');
+    if (!currentBed.value.bedNumber || !currentBed.value.roomNumber || !currentBed.value.status) {
+      ElMessage.error('请填写床位号、房间号和状态');
       return;
     }
-
-    // 模拟API请求
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    if (isEditing.value) {
-      // 模拟更新操作
-      const index = beds.value.findIndex(b => b.id === currentBed.value.id);
-      if (index !== -1) {
-        beds.value[index] = { ...currentBed.value };
+    
+    // 确保状态与入住信息一致
+    if (currentBed.value.status === '占用') {
+      if (!currentBed.value.eldersId || !currentBed.value.name) {
+        ElMessage.error('状态为“占用”时，必须填写入住老人ID和姓名');
+        return;
       }
-      ElMessage.success('床位信息更新成功！');
     } else {
-      // 模拟新增操作
-      const newId = Math.max(...beds.value.map(b => b.id), 0) + 1;
-      beds.value.push({ id: newId, ...currentBed.value });
-      ElMessage.success('新增床位成功！');
+      // 空闲状态清除入住信息
+      currentBed.value.name = null;
+      currentBed.value.eldersId = null;
     }
+
+    // 构建提交数据结构
+    const bedData = {
+      id: currentBed.value.id,
+      bedNumber: currentBed.value.bedNumber,
+      roomNumber: currentBed.value.roomNumber,
+      status: currentBed.value.status,
+      eldersId: currentBed.value.status === '占用' ? currentBed.value.eldersId : null,
+      name: currentBed.value.status === '占用' ? currentBed.value.name : null,
+      description: currentBed.value.description
+    };
+
+    const apiCall = isEditing.value 
+      ? apiClient.put(`/api/beds/${currentBed.value.id}`, bedData)
+      : apiClient.post('/api/beds', bedData);
+    
+    await apiCall;
+    ElMessage.success(isEditing.value ? '床位信息更新成功！' : '新增床位成功！');
     closeAddEditModal();
-    await fetchBeds(); // 刷新列表
-  } catch (error) {
-    ElMessage.error(error.response?.data?.msg || '操作失败，请检查输入');
-  }
-};
-
-const confirmCheckout = (bedId) => {
-  currentBed.value = beds.value.find(b => b.id === bedId);
-  isDetailModalVisible.value = false; // 关闭详情弹窗
-  isConfirmCheckoutVisible.value = true;
-};
-
-const handleCheckout = async () => {
-  try {
-    // 模拟API请求
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    const bedIdToCheckout = currentBed.value.id;
-    const bed = beds.value.find(b => b.id === bedIdToCheckout);
-    if (bed) {
-      bed.status = '空闲';
-      bed.elderName = null;
-      ElMessage.success(`床位 ${bed.bedNumber} 办理退住成功，已设为空闲！`);
-    } else {
-      throw new Error('未找到该床位');
-    }
-    isConfirmCheckoutVisible.value = false;
     await fetchBeds();
   } catch (error) {
-    ElMessage.error(error.message || '办理退住失败，请重试');
-    isConfirmCheckoutVisible.value = false;
-  } finally {
-    currentBed.value = {};
+    ElMessage.error(error.response?.data?.msg || '操作失败，请检查输入或联系管理员');
   }
 };
 
-const confirmDeleteBed = (bedId) => {
-  currentBed.value = beds.value.find(b => b.id === bedId);
-  isDetailModalVisible.value = false; // 关闭详情弹窗
-  isDeleteBedVisible.value = true;
-};
-
-const handleDeleteBed = async () => {
-  try {
-    // 模拟API请求
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    const bedIdToDelete = currentBed.value.id;
-    beds.value = beds.value.filter(b => b.id !== bedIdToDelete);
-    ElMessage.success('床位删除成功！');
-    isDeleteBedVisible.value = false;
-    await fetchBeds();
-  } catch (error) {
-    ElMessage.error(error.response?.data?.msg || '删除失败，请重试');
-    isDeleteBedVisible.value = false;
-  } finally {
-    currentBed.value = {};
-  }
-};
-
-// --- 弹窗控制 ---
+// --- 弹窗与确认逻辑 ---
 const openAddEditModal = (bed = null) => {
-  if (bed) {
+  if (bed && bed.id) {
     isEditing.value = true;
+    // 复制床位数据，避免直接修改原对象
     currentBed.value = { ...bed };
   } else {
     isEditing.value = false;
-    currentBed.value = { bedNumber: '', floor: '', roomNumber: '', status: '空闲', elderName: null, description: '' };
+    // 初始化新床位数据
+    currentBed.value = { 
+      bedNumber: '', 
+      roomNumber: '', 
+      status: '空闲', 
+      name: null, 
+      eldersId: null,
+      description: ''
+    };
   }
   isAddEditModalVisible.value = true;
 };
@@ -279,16 +244,60 @@ const closeAddEditModal = () => {
 };
 
 const openDetailModal = (bed) => {
-  currentBed.value = { ...bed };
+  detailBed.value = { ...bed };
   isDetailModalVisible.value = true;
 };
 
 const closeDetailModal = () => {
   isDetailModalVisible.value = false;
-  currentBed.value = {};
+  detailBed.value = {};
 };
 
-// --- 生命周期钩子 ---
+const closeConfirmModal = () => {
+  isConfirmModalVisible.value = false;
+};
+
+const handleEditFromDetail = (bed) => {
+  closeDetailModal();
+  setTimeout(() => openAddEditModal(bed), 150);
+};
+
+const confirmCheckout = (bed) => {
+  confirmModal.title = '确认办理退住';
+  confirmModal.message = `您要为床位 <strong>${bed.bedNumber}</strong> 上的老人办理退住吗？`;
+  confirmModal.note = '此操作会将床位状态设置为空闲，并清空入住人信息。';
+  confirmModal.confirmButtonClass = 'btn btn-info';
+  confirmModal.onConfirm = async () => {
+    try {
+      await apiClient.put(`/api/beds/${bed.id}/checkout`, { status: '空闲' });
+      ElMessage.success(`床位 ${bed.bedNumber} 办理退住成功！`);
+      closeConfirmModal();
+      await fetchBeds();
+    } catch (error) {
+      ElMessage.error(error.response?.data?.msg || '办理退住失败，请重试');
+    }
+  };
+  isConfirmModalVisible.value = true;
+};
+
+const confirmDeleteBed = (bed) => {
+  confirmModal.title = '确认删除床位';
+  confirmModal.message = `您确定要删除床位 <strong>${bed.bedNumber}</strong> 吗？`;
+  confirmModal.note = '此操作将永久删除该床位信息，且无法恢复。';
+  confirmModal.confirmButtonClass = 'btn btn-danger';
+  confirmModal.onConfirm = async () => {
+    try {
+      await apiClient.delete(`/api/beds/${bed.id}`);
+      ElMessage.success('床位删除成功！');
+      closeConfirmModal();
+      await fetchBeds();
+    } catch (error) {
+      ElMessage.error(error.response?.data?.msg || '删除失败，请重试');
+    }
+  };
+  isConfirmModalVisible.value = true;
+};
+
 onMounted(fetchBeds);
 </script>
 
@@ -298,7 +307,7 @@ onMounted(fetchBeds);
   padding: 20px;
   font-family: 'Arial', sans-serif;
   background-color: #f8f9fa;
-  min-height: calc(100vh - 60px); /* Adjust based on your header height */
+  min-height: calc(100vh - 60px);
 }
 
 .view-title {
@@ -306,6 +315,8 @@ onMounted(fetchBeds);
   color: #333;
   margin-bottom: 25px;
   text-align: center;
+  font-weight: 600;
+  letter-spacing: -0.5px;
 }
 
 /* 工具栏 */
@@ -323,6 +334,13 @@ onMounted(fetchBeds);
   flex-grow: 1;
   max-width: 400px;
   font-size: 16px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
 }
 
 /* 按钮样式 */
@@ -332,13 +350,18 @@ onMounted(fetchBeds);
   border-radius: 6px;
   color: #fff;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: all 0.3s ease;
   font-size: 16px;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn:hover {
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary { background-color: #409eff; }
@@ -347,11 +370,10 @@ onMounted(fetchBeds);
 .btn-success:hover { background-color: #85ce61; }
 .btn-secondary { background-color: #909399; }
 .btn-secondary:hover { background-color: #a6a9ad; }
-.btn-info { background-color: #17a2b8; } /* For check-out */
+.btn-info { background-color: #17a2b8; }
 .btn-info:hover { background-color: #138496; }
 .btn-danger { background-color: #f56c6c; }
 .btn-danger:hover { background-color: #f78989; }
-
 
 /* 列表加载和空状态文本 */
 .loading-text, .empty-text {
@@ -377,32 +399,49 @@ onMounted(fetchBeds);
 
 /* 床位卡片 */
 .bed-card {
-  background: #f0f2f5;
+  background: #fff;
+  border: 1px solid #eef1f6;
   border-radius: 10px;
   padding: 20px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 120px;
+  height: 150px;
 }
 
 .bed-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-  background-color: #e9ecef;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  border-color: #409eff;
 }
 
-.bed-number {
-  font-size: 28px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 10px;
+.bed-card .bed-number {
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  margin-bottom: 15px;
+  transition: background-color 0.3s, transform 0.3s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
+
+.bed-card:hover .bed-number {
+  transform: scale(1.05);
+}
+
+.bed-card .status-occupied { background-color: #f56c6c; /* 占用 - 红色 */ }
+.bed-card .status-vacant { background-color: #67c23a; /* 空闲 - 绿色 */ }
+.bed-card:hover .status-occupied { background-color: #f78989; }
+.bed-card:hover .status-vacant { background-color: #85ce61; }
 
 .elder-name {
   font-size: 18px;
@@ -417,65 +456,120 @@ onMounted(fetchBeds);
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(3px);
   animation: fadeIn 0.3s ease-out;
 }
 
 .modal-content {
   background: #fff;
-  padding: 30px;
-  border-radius: 10px;
-  width: 550px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  width: 500px; /* 调整弹窗宽度 */
   max-width: 90%;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  overflow: hidden;
   animation: slideIn 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
 }
 
-.modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 25px;
-  font-size: 24px;
+.modal-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid #f0f2f5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fafafa;
+}
+
+.modal-title {
+  font-size: 20px;
   color: #333;
-  text-align: center;
+  margin: 0;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #909399;
+  cursor: pointer;
+  transition: color 0.3s;
+  padding: 0 5px;
+}
+
+.close-btn:hover {
+  color: #606266;
+}
+
+.form-content {
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 20px;
 }
 
 .form-item {
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 
 .form-item label {
   display: block;
   margin-bottom: 8px;
-  font-weight: bold;
-  color: #555;
+  font-weight: 500;
+  color: #606266;
+  font-size: 15px;
 }
 
 .form-item input,
-.form-item select {
+.form-item select,
+.form-item textarea {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  padding: 10px 14px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
   box-sizing: border-box;
-  font-size: 16px;
+  font-size: 15px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-item input:focus,
+.form-item select:focus,
+.form-item textarea:focus {
+  outline: none;
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
 }
 
 .modal-footer {
-  text-align: right;
-  margin-top: 30px;
+  padding: 15px 24px;
+  border-top: 1px solid #f0f2f5;
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 12px;
+  background-color: #fafafa;
 }
 
 /* 详情模态框特有样式 */
 .detail-modal {
-  width: 700px;
-  max-width: 95%;
+  width: 600px; /* 调整详情弹窗宽度 */
+}
+
+.detail-content {
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
 }
 
 .detail-grid {
@@ -497,7 +591,7 @@ onMounted(fetchBeds);
 .detail-item strong {
   color: #555;
   min-width: 100px;
-  font-weight: bold;
+  font-weight: 500;
   margin-right: 10px;
 }
 
@@ -511,7 +605,7 @@ onMounted(fetchBeds);
   grid-column: 1 / -1;
 }
 
-/* 自定义确认对话框样式 (与 ElderView 保持一致) */
+/* 自定义确认对话框样式 */
 .custom-modal-overlay {
   position: fixed;
   top: 0;
@@ -522,50 +616,29 @@ onMounted(fetchBeds);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1001; /* Higher than normal modal */
+  z-index: 1001;
+  backdrop-filter: blur(3px);
 }
 
 .custom-modal-content {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   width: 380px;
   max-width: 90%;
   display: flex;
   flex-direction: column;
   animation: fadeIn 0.3s ease-out;
+  overflow: hidden;
 }
 
-.modal-header {
-  padding: 20px 20px 10px;
-  border-bottom: 1px solid #eee;
-  text-align: center;
-}
-
-.modal-title {
-  font-size: 20px;
-  color: #333;
-  margin: 0;
-}
-
-.modal-body {
-  padding: 25px 20px;
-  text-align: center;
-}
-
-.modal-body .text-info { color: #17a2b8; }
-.modal-body .text-danger { color: #f56c6c; }
-.modal-body .text-2xl { font-size: 28px; display: block; margin-bottom: 15px; } /* Adjust font-size for icon */
-.modal-body .mb-4 { margin-bottom: 1rem; } /* Add margin for icon */
-.modal-body .text-sm { font-size: 14px; }
-.modal-body .text-gray-500 { color: #909399; }
-
-.modal-footer {
-  padding: 15px 20px;
-  border-top: 1px solid #eee;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
+/* 新增/编辑表单中必须填写部分的样式 */
+.required-section {
+  background-color: #fafafa;
+  padding: 15px;
+  border-radius: 6px;
+  border: 1px solid #eee;
+  margin-bottom: 20px;
 }
 
 /* 动画 */

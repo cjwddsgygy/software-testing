@@ -1,6 +1,7 @@
 package com.yusheng.mapper;
 
 import com.yusheng.pojo.Elder;
+import com.yusheng.pojo.ElderInfo;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
@@ -14,4 +15,6 @@ public interface ElderSelfMapper {
 
 //    老人登录
     Elder selectByUsernameAndPassword(Elder elder);
+
+    ElderInfo selectById(Integer id);
 }

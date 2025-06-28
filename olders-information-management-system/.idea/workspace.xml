@@ -4,7 +4,145 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b79fa722-21b9-409a-9529-a4477ef423b8" name="更改" comment="" />
+    <list default="true" id="b79fa722-21b9-409a-9529-a4477ef423b8" name="更改" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/yusheng/config/JwtAuthenticationEntryPoint.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/yusheng/config/JwtAuthenticationTokenFilter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/yusheng/config/RestfulAccessDeniedHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/yusheng/config/SecurityConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/.idea/compiler.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/.idea/dataSources.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/.idea/encodings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/.idea/jarRepositories.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/OldersInformationManagementSystemApplication.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/config/WebConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/controller/BedsController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/controller/CareWorkersController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/controller/CareWorkersSelfController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/controller/ElderController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/controller/ElderSelfController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/controller/ExpensesController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/controller/HealthRecordsController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/controller/LoginController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/interceptor/TokenInterceptor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/mapper/AdminMapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/mapper/BedsMapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/mapper/CareWorkersMapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/mapper/CareWorkersSelfMapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/mapper/ElderMapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/mapper/ElderSelfMapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/mapper/ExpensesMapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/mapper/HealthRecordsMapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/pojo/Admin.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/pojo/AdminInfo.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/pojo/Bed.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/pojo/CareWorker.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/pojo/CareWorkerInfo.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/pojo/Elder.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/pojo/ElderInfo.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/pojo/Expense.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/pojo/HealthRecord.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/pojo/Result.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/service/AdminService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/service/BedsService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/service/CareWorkersSelfService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/service/CareWorkersService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/service/ElderSelfService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/service/ElderService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/service/ExpensesService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/service/HealthRecordsService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/service/impl/AdminServiceImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/service/impl/BedsServiceImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/service/impl/CareWorkersSelfServiceImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/service/impl/CareWorkersServiceImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/service/impl/ElderSelfServiceImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/service/impl/ElderServiceImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/service/impl/ExpensesServiceImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/service/impl/HealthRecordsServiceImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/java/com/yusheng/utils/JwtUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/resources/application.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/resources/com/yusheng/mapper/BedsMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/resources/com/yusheng/mapper/CareWorkersMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/resources/com/yusheng/mapper/CareWorkersSelfMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/resources/com/yusheng/mapper/ElderMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/resources/com/yusheng/mapper/ElderSelfMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/resources/com/yusheng/mapper/ExpensesMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/main/resources/com/yusheng/mapper/HealthRecordsMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/test/java/com/yusheng/JwtTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/src/test/java/com/yusheng/OldersInformationManagementSystemApplicationTests.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/application.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/OldersInformationManagementSystemApplication.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/config/WebConfig.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/controller/BedsController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/controller/CareWorkersController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/controller/CareWorkersSelfController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/controller/ElderController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/controller/ElderSelfController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/controller/ExpensesController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/controller/HealthRecordsController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/controller/LoginController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/interceptor/TokenInterceptor.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/mapper/AdminMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/mapper/BedsMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/mapper/BedsMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/mapper/CareWorkersMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/mapper/CareWorkersMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/mapper/CareWorkersSelfMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/mapper/CareWorkersSelfMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/mapper/ElderMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/mapper/ElderMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/mapper/ElderSelfMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/mapper/ElderSelfMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/mapper/ExpensesMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/mapper/ExpensesMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/mapper/HealthRecordsMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/mapper/HealthRecordsMapper.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/pojo/Admin.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/pojo/AdminInfo.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/pojo/Bed.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/pojo/CareWorker.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/pojo/CareWorkerInfo.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/pojo/Elder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/pojo/ElderInfo.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/pojo/Expense.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/pojo/HealthRecord.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/pojo/Result.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/service/AdminService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/service/BedsService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/service/CareWorkersSelfService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/service/CareWorkersService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/service/ElderSelfService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/service/ElderService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/service/ExpensesService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/service/HealthRecordsService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/service/impl/AdminServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/service/impl/BedsServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/service/impl/CareWorkersSelfServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/service/impl/CareWorkersServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/service/impl/ElderSelfServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/service/impl/ElderServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/service/impl/ExpensesServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/service/impl/HealthRecordsServiceImpl.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/classes/com/yusheng/utils/JwtUtils.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/surefire-reports/2025-06-25T22-44-50_064.dumpstream" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/surefire-reports/TEST-com.yusheng.JwtTest.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/surefire-reports/TEST-com.yusheng.OldersInformationManagementSystemApplicationTests.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/surefire-reports/com.yusheng.JwtTest.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/surefire-reports/com.yusheng.OldersInformationManagementSystemApplicationTests.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/test-classes/com/yusheng/JwtTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/olders-information-management-system/target/test-classes/com/yusheng/OldersInformationManagementSystemApplicationTests.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../software-testing-project/software-testing-project.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test-project.sql" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -13,6 +151,7 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
@@ -44,36 +183,36 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "LombokPluginIS_LOMBOK_JPS_FIX_ENABLED": "true",
-    "LombokPluginIS_LOMBOK_VERSION_CHECK_Enabled": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/123/Desktop/课程设计资料（给学生）/课程设计/software-testing-backend/olders-information-management-system/pom.xml",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "项目",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "MavenSettings",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;LombokPluginIS_LOMBOK_JPS_FIX_ENABLED&quot;: &quot;true&quot;,
+    &quot;LombokPluginIS_LOMBOK_VERSION_CHECK_Enabled&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/123/Desktop/课程设计资料（给学生）/课程设计/software-testing-backend/olders-information-management-system/pom.xml&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;项目&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.fileTypes&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="ExtractSuperBase.RECENT_KEYS">
       <recent name="com.yusheng.service.impl" />
@@ -106,7 +245,8 @@
       <workItem from="1750982117952" duration="941000" />
       <workItem from="1750986411011" duration="14553000" />
       <workItem from="1751008541009" duration="19565000" />
-      <workItem from="1751029313731" duration="13173000" />
+      <workItem from="1751029313731" duration="39416000" />
+      <workItem from="1751115913170" duration="1351000" />
     </task>
     <servers />
   </component>

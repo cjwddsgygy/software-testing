@@ -1,6 +1,7 @@
 package com.yusheng.mapper;
 
 import com.yusheng.pojo.CareWorker;
+import com.yusheng.pojo.CareWorkerInfo;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
@@ -14,4 +15,6 @@ public interface CareWorkersSelfMapper {
 
 //    护工登录
     CareWorker selectByUsernameAndPassword(CareWorker careWorker);
+
+    CareWorkerInfo selectById(Integer id);
 }

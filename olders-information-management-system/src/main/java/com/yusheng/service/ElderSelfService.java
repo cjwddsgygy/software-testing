@@ -13,4 +13,7 @@ public interface ElderSelfService {
 
 //    老人登录
     ElderInfo login(Elder elder);
+
+    // **新增这个方法声明**
+    ElderInfo getById(Integer id);
 }

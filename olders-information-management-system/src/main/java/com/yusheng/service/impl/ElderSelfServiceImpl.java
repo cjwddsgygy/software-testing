@@ -47,4 +47,11 @@ public class ElderSelfServiceImpl implements ElderSelfService {
         }
         return null;
     }
+
+    // **新增这个方法的实现**
+    @Override
+    public ElderInfo getById(Integer id) {
+        // 调用 Mapper 从数据库根据 ID 查询老人信息
+        return elderSelfMapper.selectById(id); // 假设您的 Mapper 有 selectById 方法
+    }
 }

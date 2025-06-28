@@ -3,36 +3,45 @@ package com.yusheng.pojo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.Entity; // 新增导入
-import jakarta.persistence.Id; // 新增导入
-import jakarta.persistence.GeneratedValue; // 新增导入
-import jakarta.persistence.GenerationType; // 新增导入
-import jakarta.persistence.Table; // 新增导入
-import jakarta.persistence.Column; // 新增导入
-
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity // <<--- 必须添加这个注解
-@Table(name = "beds") // <<--- 映射到数据库中的 'bed' 表
+@Entity                 // ✅ 关键点1: 必须有此注解，声明这是一个JPA实体
+@Table(name = "beds")   // ✅ 关键点2: 明确映射到数据库的 'beds' 表
 public class Bed {
-    @Id // <<--- 必须标注主键
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // <<--- 标注主键生成策略
+
+    @Id                 // ✅ 关键点3: 必须有此注解，标注主键
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // ✅ 关键点4: 标注主键自增策略
     private Integer id;
-    @Column(name = "room_number") // 驼峰命名转换为下划线命名
-    private String roomNumber;
-    @Column(name = "bed_number") // 驼峰命名转换为下划线命名
-    private String bedNumber;
-    private String status;
-    @Column(name = "elders_id") // 明确映射到数据库的 elders_id 字段
-    private Integer eldersId; // 对应数据库的 elders_id 字段
+
+    // ✅ 关键点5: 使用 @Column 注解将Java的驼峰命名映射到数据库的下划线命名
+    @Column(name = "elders_id")
+    private Integer eldersId;
+
+    // ✅ 关键点6: 修复了name的类型，从Integer改为String
     @Column(name = "name")
-    private Integer name;
-    @Column(name = "created_at")
+    private String name;
+
+    @Column(name = "room_number")
+    private String roomNumber;
+
+    @Column(name = "bed_number")
+    private String bedNumber;
+
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "created_at", updatable = false) // 创建时自动填充，禁止更新
     private LocalDateTime createdAt;
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
 }

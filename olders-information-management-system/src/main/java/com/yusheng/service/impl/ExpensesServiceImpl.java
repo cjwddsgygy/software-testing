@@ -1,51 +1,63 @@
 package com.yusheng.service.impl;
 
-import com.yusheng.mapper.ExpensesMapper;
 import com.yusheng.pojo.Expense;
+import com.yusheng.repository.ExpenseRepository; // 引入 JPA Repository
 import com.yusheng.service.ExpensesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ExpensesServiceImpl implements ExpensesService {
 
     @Autowired
-    private ExpensesMapper expensesMapper;
+    private ExpenseRepository expenseRepository; // 注入 JPA Repository
 
-    //    查询全部费用数据
     @Override
-    public List<Expense> findAll() {
-        return expensesMapper.findAll();
+    public Page<Expense> list(String search, int page, int pageSize) {
+        // 创建分页请求，按 ID 降序排序，最新的在前面
+        Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by("id").descending());
+
+        if (StringUtils.hasText(search)) {
+            // 如果有搜索词，调用自定义的搜索方法
+            return expenseRepository.findByElderContainingOrItemNameContaining(search, search, pageable);
+        } else {
+            // 如果没有搜索词，查询所有
+            return expenseRepository.findAll(pageable);
+        }
     }
 
-    //    删除费用
     @Override
     public void deleteById(Integer id) {
-        expensesMapper.deleteById(id);
+        expenseRepository.deleteById(id);
     }
 
-    //    新增费用
     @Override
     public void save(Expense expense) {
-        expense.setCreatedAt(LocalDateTime.now());
-        expense.setUpdatedAt(LocalDateTime.now());
-        expensesMapper.save(expense);
+        // 新增时，JPA @PrePersist 注解会自动设置 createdAt 和 updatedAt
+        // 默认状态可以设置为“未支付”
+        if(expense.getStatus() == null) {
+            expense.setStatus("未支付");
+        }
+        expenseRepository.save(expense);
     }
 
-    //    根据ID查询费用信息
     @Override
     public Expense getInfo(Integer id) {
-        return expensesMapper.getById(id);
+        Optional<Expense> optionalExpense = expenseRepository.findById(id);
+        // 如果找不到，可以返回 null 或抛出异常
+        return optionalExpense.orElse(null);
     }
 
-    //    修改费用
     @Override
     public void update(Expense expense) {
-        expense.setUpdatedAt(LocalDateTime.now());
-        expensesMapper.updateById(expense);
+        // 更新时，JPA @PreUpdate 注解会自动更新 updatedAt
+        expenseRepository.save(expense); // save 方法在有 id 时是更新，没有 id 时是新增
     }
-
 }

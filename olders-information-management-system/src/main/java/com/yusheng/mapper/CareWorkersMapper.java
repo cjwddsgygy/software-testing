@@ -1,18 +1,15 @@
 package com.yusheng.mapper;
 
 import com.yusheng.pojo.CareWorker;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
 @Mapper
 public interface CareWorkersMapper {
 
-//    查询全部护工数据
-    List<CareWorker> findAll();
+    //    查询全部护工数据
+    List<CareWorker> findCareWorkers(@Param("id") Integer id, @Param("name") String name);
 
 //    删除护工
     void deleteById(Integer id);
@@ -25,4 +22,6 @@ public interface CareWorkersMapper {
 
 //    修改护工
     void updateById(CareWorker careWorker);
+
+
 }

@@ -18,8 +18,13 @@
         <div class="stat-value">{{ stats.availableBeds || 0 }}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">收费项目数</div>
-        <div class="stat-value">{{ stats.totalCharges || 0 }}</div>
+        <div class="stat-label">收费记录总数</div>
+        <div class="stat-value">{{ stats.totalExpenses || 0 }}</div>
+      </div>
+      <!-- ✅ 新增：护工总数卡片 -->
+      <div class="stat-card">
+        <div class="stat-label">护工总数</div>
+        <div class="stat-value">{{ stats.totalCareworkers || 0 }}</div>
       </div>
     </div>
   </div>
@@ -36,26 +41,21 @@ const loading = ref(true);
 const fetchStats = async () => {
   loading.value = true;
   try {
-    // 关键：调用后端统计接口
-    const response = await apiClient.get('/stats/overview'); 
+    const response = await apiClient.get('/api/stats/overview'); 
     
-    // 根据您后端 Result 类的 code 字段判断
     if (response.data.code === 0) {
       stats.value = response.data.data;
     } else {
-      // 这里的错误信息通常会通过 apiClient 的响应拦截器处理，并弹出 ElMessage
-      throw new Error(response.data.message || '获取统计数据失败'); 
+      throw new Error(response.data.msg || '获取统计数据失败'); 
     }
   } catch (error) {
     console.error("HomeView 获取统计数据失败:", error);
-    // ElMessage.error(error.message || '网络错误，无法加载统计数据'); // 这行通常会被拦截器处理掉
-    
-    // 当请求失败时，为 stats 设置默认值，避免页面显示空
     stats.value = {
       totalOlders: 'N/A',
       totalBeds: 'N/A',
       availableBeds: 'N/A',
-      totalCharges: 'N/A',
+      totalExpenses: 'N/A',
+      totalCareworkers: 'N/A', // ✅ 新增：失败时也显示 N/A
     };
   } finally {
     loading.value = false;
@@ -71,7 +71,7 @@ onMounted(fetchStats);
   padding: 20px;
   font-family: 'Arial', sans-serif;
   background-color: #f8f9fa;
-  min-height: calc(100vh - 60px); /* Adjust based on your header height */
+  min-height: calc(100vh - 60px);
 }
 
 .view-title {
@@ -89,8 +89,9 @@ onMounted(fetchStats);
 }
 
 .stats-grid {
+  /* 调整列数，以适应新增的卡片 */
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* 略微缩小 minmax 宽度，确保能容纳5列 */
   gap: 30px;
 }
 
@@ -131,12 +132,14 @@ onMounted(fetchStats);
 .stat-card:nth-child(1) .stat-value { color: #409eff; } /* Blue for total elders */
 .stat-card:nth-child(2) .stat-value { color: #67c23a; } /* Green for total beds */
 .stat-card:nth-child(3) .stat-value { color: #e6a23c; } /* Orange for available beds */
-.stat-card:nth-child(4) .stat-value { color: #f56c6c; } /* Red for total charges */
+.stat-card:nth-child(4) .stat-value { color: #f56c6c; } /* Red for total Expenses */
+.stat-card:nth-child(5) .stat-value { color: #8a2be2; } /* 紫色 for total Careworkers (新增) */
+
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* 调整移动端布局 */
   }
   .stat-value {
     font-size: 40px;

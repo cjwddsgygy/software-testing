@@ -12,4 +12,5 @@ public class HomeViewStatsDto {
     private long totalBeds;
     private long availableBeds;
     private long totalExpenses; // 收费项目种类数
+    private long totalCareworkers;//护工总数
 }
