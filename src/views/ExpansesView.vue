@@ -17,7 +17,7 @@
         </div>
       </div>
       <div class="button-group">
-        <button @click="openModal()" class="btn btn-secondary add-btn">
+        <button @click="openModal()" class="btn btn-primary add-btn">
           <i class="fas fa-plus"></i>
           <span>新增记录</span>
         </button>
@@ -89,7 +89,7 @@
         </div>
         <div class="modal-footer">
           <!-- 修复 #6: “取消”按钮边框 -->
-          <button type="button" @click="closeModal" class="btn btn-danger-outline"><span>取消</span></button>
+          <button type="button" @click="closeModal" class="btn btn-secondary"><span>取消</span></button>
           <!-- 修复 #7: “保存更新”按钮边框 -->
           <button type="button" @click="handleSave" class="btn btn-danger">
             <i class="fas fa-check"></i>
@@ -140,7 +140,7 @@
             <p class="confirm-submessage">此操作将永久删除，无法恢复。</p>
             <div class="confirm-actions">
               <!-- 修复 #2: “取消”按钮边框 -->
-              <button type="button" class="btn btn-danger-outline" @click="isDeleteDialogVisible = false"><span>取消</span></button>
+              <button type="button" class="btn btn-secondary" @click="isDeleteDialogVisible = false"><span>取消</span></button>
               <!-- 修复 #3: “确认删除”按钮文字颜色 -->
               <button type="button" class="btn btn-danger" @click="handleConfirmDelete">
                 <i class="fas fa-trash"></i>

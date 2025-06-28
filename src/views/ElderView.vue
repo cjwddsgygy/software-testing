@@ -1,179 +1,168 @@
 <template>
-  <div class="Elder-View">
-    <h2 class="view-title">老人信息管理</h2>
+  <div class="elder-view">
+    <div class="view-header">
+      <h2 class="view-title">老人信息管理</h2>
+      <p class="view-description">查看、添加和管理所有在院老人的详细信息</p>
+    </div>
 
-    <!-- Toolbar: 统一搜索框和新增按钮 -->
+    <!-- 工具栏 -->
     <div class="toolbar">
-      <input type="text" v-model="searchParams.searchTerm" @keyup.enter="fetchElders" placeholder="按姓名或ID搜索..." class="search-input" />
-      <button @click="fetchElders" class="btn btn-primary">搜索</button>
-      <button @click="openModal()" class="btn btn-success">新增老人</button>
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" v-model="searchParams.searchTerm" @keyup.enter="fetchElders" placeholder="按姓名或ID搜索..."/>
+          <button @click="fetchElders" class="action-btn" title="搜索"><i class="fas fa-search"></i></button>
+          <button v-if="searchParams.searchTerm" @click="resetSearch" class="clear-button" title="清空">×</button>
+        </div>
+      </div>
+      <div class="button-group">
+        <button @click="openModal()" class="btn btn-primary add-btn">
+          <i class="fas fa-plus"></i>
+          <span>新增老人</span>
+        </button>
+      </div>
     </div>
     
     <!-- 数据表格 -->
-    <div v-if="loading" class="loading-text">正在加载老人列表...</div>
-    <div v-else class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>姓名</th>
-            <th>年龄</th>
-            <th>出生日期</th>
-            <th>民族</th>          
-            <th>教育程度</th>      
-            <th>账户名</th>
-            <th>床位号</th>
-            <th>护理级别</th>
-            <th>家属联系方式</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="elder in elders" :key="elder.id">
-            <td>{{ elder.id }}</td>
-            <td>{{ elder.name }}</td>
-            <td>{{ elder.age }}</td>
-            <td>{{ formatDisplayDate(elder.birthDate) }}</td>
-            <td>{{ elder.ethnicity }}</td> 
-            <td>{{ elder.education }}</td> 
-            <td>{{ elder.account }}</td>
-            <td>{{ elder.bedNumber }}</td>
-            <td>{{ elder.careLevel }}</td>
-            <td>{{ elder.relativeContact }}</td>
-            <td class="action-buttons">
-              <button @click="openDetailModal(elder)" class="action-btn detail-btn">详情</button>
-              <button @click="openModal(elder)" class="action-btn edit-btn">编辑</button>
-              <button @click="confirmDelete(elder.id)" class="action-btn delete-btn">删除</button>
-            </td>
-          </tr>
-          <tr v-if="!elders || elders.length === 0">
-            <td colspan="11" class="empty-text">当前没有在院老人信息或未搜索到结果。</td> 
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- 新增/编辑弹窗 -->
-    <div v-if="isModalVisible" class="modal-overlay" @click="closeModal">
-      <div class="modal-content elder-modal" @click.stop> 
-        <div class="modal-header">
-          <h3>{{ isEditing ? '编辑老人信息' : '新增老人' }}</h3>
-          <button class="close-btn" @click="closeModal">×</button>
-        </div>
-        <div class="modal-body">
-          <!-- 修复：将整个表单内容和按钮区域都包含在 <form> 标签内 -->
-          <form @submit.prevent="handleSave">
-            <div class="form-grid">
-              <!-- 基础信息（必填项，优先显示） -->
-              <div class="form-item"><label>姓名:</label><input v-model="currentElder.name" type="text" required></div>
-              <div class="form-item"><label>年龄:</label><input v-model="currentElder.age" type="number" required></div>
-              <div class="form-item"><label>出生日期:</label><input v-model="currentElder.birthDate" type="date" required></div>
-              <div class="form-item"><label>民族:</label><input v-model="currentElder.ethnicity" type="text" required></div>
-              <div class="form-item"><label>账户名:</label><input v-model="currentElder.account" type="text" required></div>
-              <!-- 密码只在新增时显示且必填 -->
-              <div class="form-item" v-if="!isEditing">
-                <label>密码:</label><input v-model="currentElder.password" type="password" required>
-              </div>
-              <div class="form-item" v-else>
-                <label> </label><div></div>
-              </div>
-              
-              <!-- 编辑模式显示完整表单 -->
-              <div v-if="isEditing">
-                <div class="form-item"><label>教育程度:</label><input v-model="currentElder.education" type="text"></div>
-                <div class="form-item"><label>婚姻状况:</label><input v-model="currentElder.maritalStatus" type="text"></div>
-                <div class="form-item"><label>床位号:</label><input v-model="currentElder.bedNumber" type="text"></div>
-                <div class="form-item"><label>护理级别:</label><input v-model="currentElder.careLevel" type="text"></div>
-                <div class="form-item"><label>费用类型:</label><input v-model="currentElder.feeType" type="text"></div>
-                <div class="form-item"><label>费用(月):</label><input v-model="currentElder.expenses" type="number"></div>
-                
-                <!-- 跨两列的文本域 -->
-                <div class="form-item full-width"><label>家属联系方式:</label><textarea v-model="currentElder.relativeContact"></textarea></div>
-                <div class="form-item full-width"><label>兴趣爱好:</label><textarea v-model="currentElder.hobbies"></textarea></div>
-                <div class="form-item full-width"><label>医疗状况:</label><textarea v-model="currentElder.medicalCare"></textarea></div>
-              </div>
-            </div>
-            
-            <!-- 修复：将按钮区域移到 <form> 标签内部 -->
-            <div class="modal-footer">
-              <button type="button" @click="closeModal" class="btn btn-secondary">取消</button>
-              <button type="submit" class="btn btn-primary">
-                {{ isEditing ? '保存更新' : '确认新增' }}
-              </button>
-            </div>
-          </form>
-        </div>
+    <div class="data-card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead class="table-header-rounded">
+            <tr>
+              <th>ID</th>
+              <th>姓名</th>
+              <th>年龄</th>
+              <th>账户名</th>
+              <th>床位号</th>
+              <th>护理级别</th>
+              <th>家属联系方式</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody v-if="!loading && elders.length > 0">
+            <tr v-for="elder in elders" :key="elder.id" class="table-row-hover">
+              <td>{{ elder.id }}</td>
+              <td>{{ elder.name }}</td>
+              <td>{{ elder.age }}</td>
+              <td>{{ elder.account }}</td>
+              <td><span class="tag tag-bed">{{ elder.bedNumber || '未分配' }}</span></td>
+              <td><span class="tag" :class="getCareLevelClass(elder.careLevel)">{{ elder.careLevel || '未评定' }}</span></td>
+              <td class="notes-cell" :title="elder.relativeContact">{{ elder.relativeContact || '无' }}</td>
+              <td class="actions-cell">
+                <button @click="openDetailModal(elder)" class="action-btn" title="查看详情"><i class="fas fa-eye"></i></button>
+                <button @click="openModal(elder)" class="action-btn" title="编辑"><i class="fas fa-pencil-alt"></i></button>
+                <button @click="confirmDelete(elder.id)" class="action-btn" title="删除"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div v-if="loading" class="loading-placeholder"><div class="loading-spinner"></div><p>正在加载...</p></div>
+        <div v-if="!loading && elders.length === 0" class="empty-content"><i class="fas fa-users"></i><p>暂无老人信息</p></div>
       </div>
     </div>
 
+    <!-- 新增/编辑弹窗 -->
+    <div v-if="isModalVisible" class="modal-backdrop" @click="closeModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>{{ isEditing ? '编辑老人信息' : '新增老人' }}</h3>
+          <button @click="closeModal" class="close-btn" title="关闭">×</button>
+        </div>
+        <div class="modal-body">
+          <form @submit.prevent="handleSave">
+            <div class="form-section">
+              <h4 class="section-title">基础信息 (必填)</h4>
+              <div class="form-grid">
+                <div class="form-field"><label for="name">姓名</label><div class="input-wrapper"><i class="fas fa-user"></i><input id="name" v-model="currentElder.name" type="text" required placeholder="请输入姓名"/></div></div>
+                <div class="form-field"><label for="age">年龄</label><div class="input-wrapper"><i class="fas fa-birthday-cake"></i><input id="age" v-model.number="currentElder.age" type="number" required placeholder="请输入年龄"/></div></div>
+                <div class="form-field"><label for="birthDate">出生日期</label><div class="input-wrapper"><i class="fas fa-calendar-alt"></i><input id="birthDate" v-model="currentElder.birthDate" type="date" required/></div></div>
+                <div class="form-field"><label for="ethnicity">民族</label><div class="input-wrapper"><i class="fas fa-flag"></i><input id="ethnicity" v-model="currentElder.ethnicity" type="text" required placeholder="例如：汉族"/></div></div>
+                <div class="form-field"><label for="account">账户名</label><div class="input-wrapper"><i class="fas fa-user-circle"></i><input id="account" v-model="currentElder.account" type="text" required placeholder="用于登录的唯一账号"/></div></div>
+                <div class="form-field" v-if="!isEditing"><label for="password">初始密码</label><div class="input-wrapper"><i class="fas fa-lock"></i><input id="password" v-model="currentElder.password" type="password" required placeholder="为新用户设置密码"/></div></div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <h4 class="section-title">详细信息 (可选)</h4>
+              <div class="form-grid">
+                <div class="form-field"><label for="education">教育程度</label><div class="input-wrapper"><i class="fas fa-graduation-cap"></i><input id="education" v-model="currentElder.education" type="text" placeholder="例如：高中、本科"/></div></div>
+                <div class="form-field"><label for="maritalStatus">婚姻状况</label><div class="input-wrapper"><i class="fas fa-heart"></i><input id="maritalStatus" v-model="currentElder.maritalStatus" type="text" placeholder="例如：已婚、丧偶"/></div></div>
+                <div class="form-field"><label for="bedNumber">床位号</label><div class="input-wrapper"><i class="fas fa-bed"></i><input id="bedNumber" v-model="currentElder.bedNumber" type="text" placeholder="例如：A101"/></div></div>
+                <div class="form-field"><label for="careLevel">护理级别</label><div class="input-wrapper"><i class="fas fa-user-md"></i><input id="careLevel" v-model="currentElder.careLevel" type="text" placeholder="例如：一级护理"/></div></div>
+                <div class="form-field"><label for="feeType">费用类型</label><div class="input-wrapper"><i class="fas fa-credit-card"></i><input id="feeType" v-model="currentElder.feeType" type="text" placeholder="例如：月结、全包"/></div></div>
+                <div class="form-field"><label for="expenses">月度费用 (元)</label><div class="input-wrapper"><span>¥</span><input id="expenses" v-model.number="currentElder.expenses" type="number" step="0.01" placeholder="请输入月度费用"/></div></div>
+                <div class="form-field full-span"><label for="relativeContact">家属联系方式</label><div class="input-wrapper"><i class="fas fa-phone"></i><textarea id="relativeContact" v-model="currentElder.relativeContact" rows="2" placeholder="姓名 电话，多个请换行"></textarea></div></div>
+                <div class="form-field full-span"><label for="hobbies">兴趣爱好</label><div class="input-wrapper"><i class="fas fa-palette"></i><textarea id="hobbies" v-model="currentElder.hobbies" rows="2" placeholder="例如：书法、听戏"></textarea></div></div>
+                <div class="form-field full-span"><label for="medicalCare">医疗状况</label><div class="input-wrapper"><i class="fas fa-notes-medical"></i><textarea id="medicalCare" v-model="currentElder.medicalCare" rows="3" placeholder="记录老人的主要健康问题，如：高血压"></textarea></div></div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" @click="closeModal" class="btn btn-secondary"><span>取消</span></button>
+          <button type="button" @click="handleSave" class="btn btn-danger"><i class="fas fa-check"></i><span>{{ isEditing ? '保存更新' : '确认新增' }}</span></button>
+        </div>
+      </div>
+    </div>
+    
     <!-- 详情弹窗 -->
-    <div v-if="isDetailModalVisible" class="modal-overlay" @click="closeDetailModal">
+    <div v-if="isDetailModalVisible" class="modal-backdrop" @click="closeDetailModal">
       <div class="modal-content detail-modal" @click.stop>
         <div class="modal-header">
           <h3>老人详细信息</h3>
-          <button class="close-btn" @click="closeDetailModal">×</button>
+          <button @click="closeDetailModal" class="close-btn" title="关闭">×</button>
         </div>
-        <div class="modal-body">
-          <div v-if="detailElder" class="detail-grid">
-            <div class="detail-item"><strong>ID:</strong><span>{{ detailElder.id }}</span></div>
-            <div class="detail-item"><strong>姓名:</strong><span>{{ detailElder.name }}</span></div>
-            <div class="detail-item"><strong>账户名:</strong><span>{{ detailElder.account }}</span></div>
-            <div class="detail-item"><strong>年龄:</strong><span>{{ detailElder.age }}</span></div>
-            <div class="detail-item"><strong>民族:</strong><span>{{ detailElder.ethnicity }}</span></div>
-            <div class="detail-item"><strong>出生日期:</strong><span>{{ formatDisplayDate(detailElder.birthDate) }}</span></div>
-            <div class="detail-item"><strong>教育程度:</strong><span>{{ detailElder.education }}</span></div>
-            <div class="detail-item"><strong>婚姻状况:</strong><span>{{ detailElder.maritalStatus }}</span></div>
-            <div class="detail-item"><strong>床位号:</strong><span>{{ detailElder.bedNumber }}</span></div>
-            <div class="detail-item"><strong>护理级别:</strong><span>{{ detailElder.careLevel }}</span></div>
-            <div class="detail-item"><strong>费用类型:</strong><span>{{ detailElder.feeType }}</span></div>
-            <div class="detail-item"><strong>费用(月):</strong><span>{{ detailElder.expenses }} 元</span></div>
-            <div class="detail-item full-width"><strong>家属联系方式:</strong><span>{{ detailElder.relativeContact }}</span></div>
-            <div class="detail-item full-width"><strong>兴趣爱好:</strong><span>{{ detailElder.hobbies }}</span></div>
-            <div class="detail-item full-width"><strong>医疗状况:</strong><span>{{ detailElder.medicalCare }}</span></div>
-            <div class="detail-item"><strong>入院时间:</strong><span>{{ formatDisplayDate(detailElder.checkInDate, true) }}</span></div>
-            <div class="detail-item"><strong>出院时间:</strong><span>{{ formatDisplayDate(detailElder.checkOutDate, true) || '未出院' }}</span></div>
-            <div class="detail-item"><strong>信息创建时间:</strong><span>{{ formatDisplayDate(detailElder.createdAt, true) }}</span></div>
-            <div class="detail-item"><strong>最后更新时间:</strong><span>{{ formatDisplayDate(detailElder.updatedAt, true) }}</span></div>
+        <div v-if="detailElder" class="modal-body">
+          <div class="detail-grid">
+            <div class="detail-item"><div class="item-label"><i class="fas fa-id-card-o"></i> ID</div><div class="item-value">{{ detailElder.id }}</div></div>
+            <div class="detail-item"><div class="item-label"><i class="fas fa-user"></i> 姓名</div><div class="item-value">{{ detailElder.name }}</div></div>
+            <div class="detail-item"><div class="item-label"><i class="fas fa-user-circle"></i> 账户名</div><div class="item-value">{{ detailElder.account }}</div></div>
+            <div class="detail-item"><div class="item-label"><i class="fas fa-birthday-cake"></i> 年龄</div><div class="item-value">{{ detailElder.age }}</div></div>
+            <div class="detail-item"><div class="item-label"><i class="fas fa-flag"></i> 民族</div><div class="item-value">{{ detailElder.ethnicity }}</div></div>
+            <div class="detail-item"><div class="item-label"><i class="fas fa-calendar-alt"></i> 出生日期</div><div class="item-value">{{ formatDate(detailElder.birthDate) }}</div></div>
+            <div class="detail-item"><div class="item-label"><i class="fas fa-graduation-cap"></i> 教育程度</div><div class="item-value">{{ detailElder.education || '未填写' }}</div></div>
+            <div class="detail-item"><div class="item-label"><i class="fas fa-heart"></i> 婚姻状况</div><div class="item-value">{{ detailElder.maritalStatus || '未填写' }}</div></div>
+            <div class="detail-item"><div class="item-label"><i class="fas fa-bed"></i> 床位号</div><div class="item-value">{{ detailElder.bedNumber || '未分配' }}</div></div>
+            <div class="detail-item"><div class="item-label"><i class="fas fa-user-md"></i> 护理级别</div><div class="item-value">{{ detailElder.careLevel || '未评定' }}</div></div>
+            <div class="detail-item"><div class="item-label"><i class="fas fa-credit-card"></i> 费用类型</div><div class="item-value">{{ detailElder.feeType || '未设置' }}</div></div>
+            <div class="detail-item"><div class="item-label"><i class="fas fa-money-bill-wave"></i> 月度费用</div><div class="item-value">{{ detailElder.expenses ? detailElder.expenses + ' 元' : '未设置' }}</div></div>
+            <div class="detail-item full-span"><div class="item-label"><i class="fas fa-phone"></i> 家属联系方式</div><div class="item-value note-value">{{ detailElder.relativeContact || '未填写' }}</div></div>
+            <div class="detail-item full-span"><div class="item-label"><i class="fas fa-palette"></i> 兴趣爱好</div><div class="item-value note-value">{{ detailElder.hobbies || '未填写' }}</div></div>
+            <div class="detail-item full-span"><div class="item-label"><i class="fas fa-notes-medical"></i> 医疗状况</div><div class="item-value note-value">{{ detailElder.medicalCare || '未填写' }}</div></div>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" @click="closeDetailModal" class="btn btn-primary">关闭</button>
+          <button type="button" @click="closeDetailModal" class="btn btn-danger"><span>关闭</span></button>
         </div>
       </div>
     </div>
 
     <!-- 删除确认弹窗 -->
-    <div v-if="isDeleteDialogVisible" class="custom-modal-overlay" @click="isDeleteDialogVisible = false">
-      <div class="custom-modal-content" @click.stop>
-        <div class="modal-header">
-          <h3 class="modal-title">确认删除</h3>
-        </div>
-        <div class="modal-body text-center">
-          <i class="el-icon-warning-outline text-danger text-2xl mb-4"></i>
-          <p>您确定要删除这位老人的信息吗？</p>
-          <p class="text-sm text-gray-500 mt-2">此操作将永久删除该记录，且无法恢复。</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" @click="isDeleteDialogVisible = false">取消</button>
-          <button type="button" class="btn btn-danger" @click="handleConfirmDelete">确认删除</button>
+    <div v-if="isDeleteDialogVisible" class="modal-backdrop" @click="isDeleteDialogVisible = false">
+      <div class="confirm-modal" @click.stop>
+        <div class="confirm-icon-wrapper"><div class="confirm-icon"><i class="fas fa-exclamation-triangle"></i></div></div>
+        <div class="confirm-content">
+            <h3 class="confirm-title">确认删除</h3>
+            <p class="confirm-message">您确定要删除这位老人的信息吗？</p>
+            <p class="confirm-submessage">此操作将永久删除，无法恢复。</p>
+            <div class="confirm-actions">
+              <button type="button" class="btn btn-secondary" @click="isDeleteDialogVisible = false"><span>取消</span></button>
+              <button type="button" class="btn btn-danger" @click="handleConfirmDelete"><i class="fas fa-trash"></i><span>确认删除</span></button>
+            </div>
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ref, reactive, onMounted, watch } from 'vue';
 import apiClient from '@/api/request';
 
 // --- 响应式状态 ---
 const elders = ref([]);
 const loading = ref(true);
-const searchParams = reactive({
-  searchTerm: ''
-});
+const searchParams = reactive({ searchTerm: '' });
 const isModalVisible = ref(false);
 const currentElder = ref({});
 const isEditing = ref(false);
@@ -182,77 +171,52 @@ const detailElder = ref(null);
 const isDeleteDialogVisible = ref(false);
 const deletingElderId = ref(null);
 
-// --- API 调用函数 ---
+// --- API 调用 ---
 const fetchElders = async () => {
   loading.value = true;
   try {
-    const response = await apiClient.get('/api/elders', {
-      params: { searchTerm: searchParams.searchTerm }
-    });
+    const response = await apiClient.get('/api/elders', { params: { searchTerm: searchParams.searchTerm } });
     if (response.data.code === 0) {
-      elders.value = response.data.data;
-    } else {
-      throw new Error(response.data.msg || '获取数据失败');
+      elders.value = response.data.data || [];
     }
   } catch (error) {
-    ElMessage.error(error.message || '网络错误');
+    console.error('获取老人信息失败:', error);
   } finally {
     loading.value = false;
   }
 };
 
 const handleSave = async () => {
-  try {
-    if (!currentElder.value.name || !currentElder.value.age || !currentElder.value.birthDate || !currentElder.value.ethnicity || !currentElder.value.account) {
-      ElMessage.error('请填写所有必填项 (姓名, 年龄, 出生日期, 民族, 账户名)');
+  const requiredFields = ['name', 'age', 'birthDate', 'ethnicity', 'account'];
+  if (!isEditing.value) requiredFields.push('password');
+  for (const field of requiredFields) {
+    if (!currentElder.value[field] || String(currentElder.value[field]).trim() === '') {
+      alert(`${field} 是必填项！`); 
       return;
     }
-    if (!isEditing.value && !currentElder.value.password) {
-      ElMessage.error('新增老人必须设置密码');
-      return;
-    }
+  }
 
+  try {
     if (isEditing.value) {
-      await apiClient.put('/api/elders', currentElder.value);
-      ElMessage.success('老人信息更新成功！');
+      await apiClient.put(`/api/elders/${currentElder.value.elders_id}`, currentElder.value);
     } else {
-      // 新增时只发送必要字段
-      const minimalElderData = {
-        name: currentElder.value.name,
-        age: currentElder.value.age,
-        birthDate: currentElder.value.birthDate,
-        ethnicity: currentElder.value.ethnicity,
-        account: currentElder.value.account,
-        password: currentElder.value.password
-      };
-      await apiClient.post('/api/elders', minimalElderData);
-      ElMessage.success('新增老人成功！');
+      await apiClient.post('/api/elders', currentElder.value);
     }
     closeModal();
     await fetchElders();
   } catch (error) {
-    ElMessage.error(error.response?.data?.msg || '操作失败，请检查输入');
+    console.error('保存老人信息失败:', error);
+    alert(`操作失败: ${error.response?.data?.msg || error.message}`);
   }
 };
 
-const confirmDelete = (id) => {
-  deletingElderId.value = id;
-  isDeleteDialogVisible.value = true;
-};
-
-const handleConfirmDelete = async () => {
-  if (!deletingElderId.value) return;
-  
+const deleteElder = async (id) => {
   try {
-    await apiClient.delete(`/api/elders/${deletingElderId.value}`);
-    ElMessage.success('删除成功！');
+    await apiClient.delete(`/api/elders/${id}`);
     isDeleteDialogVisible.value = false;
     await fetchElders();
   } catch (error) {
-    ElMessage.error(error.response?.data?.msg || '删除失败，请重试');
-    isDeleteDialogVisible.value = false;
-  } finally {
-    deletingElderId.value = null;
+    console.error('删除老人信息失败:', error);
   }
 };
 
@@ -260,407 +224,169 @@ const handleConfirmDelete = async () => {
 const openModal = (elder = null) => {
   if (elder) {
     isEditing.value = true;
-    currentElder.value = { 
-      ...elder,
-      birthDate: elder.birthDate ? formatDisplayDate(elder.birthDate) : '',
-      ethnicity: elder.ethnicity || '',       
-      education: elder.education || '',       
-      maritalStatus: elder.maritalStatus || '', 
-      hobbies: elder.hobbies || '',           
-      medicalCare: elder.medicalCare || '',   
-      feeType: elder.feeType || '月结',       
-      expenses: elder.expenses || null,
-      bedNumber: elder.bedNumber || '',       
-      careLevel: elder.careLevel || '',       
-      relativeContact: elder.relativeContact || '',
-      password: elder.password || '',
-    };
+    currentElder.value = { ...elder, birthDate: formatDate(elder.birthDate) };
   } else {
     isEditing.value = false;
     currentElder.value = {
-        name: '', 
-        age: null,
-        birthDate: '', 
-        ethnicity: '', 
-        account: '', 
-        password: '',
-        
-        education: '',         
-        maritalStatus: '',     
-        hobbies: '',           
-        medicalCare: '',   
-        feeType: '月结',       
-        expenses: null,        
-        bedNumber: '',         
-        careLevel: '',         
-        relativeContact: ''    
+      name: '', age: null, birthDate: '', ethnicity: '', account: '', password: '',
+      education: '', maritalStatus: '', hobbies: '', medicalCare: '',
+      feeType: '月结', expenses: null, bedNumber: '', careLevel: '', relativeContact: ''
     };
   }
   isModalVisible.value = true;
 };
-
-const closeModal = () => {
-  isModalVisible.value = false;
-  currentElder.value = {};
-};
-
-const openDetailModal = (elder) => {
-  detailElder.value = { ...elder };
-  isDetailModalVisible.value = true;
-};
-
-const closeDetailModal = () => {
-  isDetailModalVisible.value = false;
-  detailElder.value = null;
-};
+const closeModal = () => { isModalVisible.value = false; currentElder.value = {}; };
+const openDetailModal = (elder) => { detailElder.value = elder; isDetailModalVisible.value = true; };
+const closeDetailModal = () => { isDetailModalVisible.value = false; detailElder.value = null; };
+const confirmDelete = (id) => { deletingElderId.value = id; isDeleteDialogVisible.value = true; };
+const handleConfirmDelete = () => deleteElder(deletingElderId.value);
 
 // --- 工具函数 ---
-const formatDisplayDate = (dateString, showTime = false) => {
-    if (!dateString) return '';
-    try {
-        if (!showTime && dateString.length >= 10 && dateString.charAt(4) === '-' && dateString.charAt(7) === '-') {
-            return dateString.substring(0, 10);
-        }
-        
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return dateString; 
-
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const datePart = `${year}-${month}-${day}`;
-
-        if (showTime) {
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const seconds = String(date.getSeconds()).padStart(2, '0');
-            const timePart = `${hours}:${minutes}:${seconds}`;
-            return `${datePart} ${timePart}`;
-        }
-        return datePart;
-    } catch (e) {
-        return dateString;
-    }
+const formatDate = (dateString) => dateString ? new Date(dateString).toISOString().split('T')[0] : '';
+const resetSearch = () => { searchParams.searchTerm = ''; fetchElders(); };
+const getCareLevelClass = (level) => {
+  if (!level) return 'default';
+  if (level.includes('一')) return 'danger';
+  if (level.includes('二')) return 'warning';
+  if (level.includes('三')) return 'success';
+  return 'info';
 };
 
 // --- 生命周期钩子 ---
 onMounted(fetchElders);
+watch(() => searchParams.searchTerm, fetchElders);
 </script>
 
 <style scoped>
-/* 基础样式保持不变 */
-.Elder-View { padding: 20px; }
-.view-title { font-size: 24px; margin-bottom: 20px; color: #333; }
-.loading-text, .empty-text { font-size: 16px; color: #888; text-align: center; padding: 40px; }
-.toolbar { display: flex; gap: 10px; margin-bottom: 20px; }
-.search-input { padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; flex-grow: 1; max-width: 300px; }
-.btn { padding: 8px 15px; border: none; border-radius: 4px; color: #fff; cursor: pointer; transition: background-color 0.3s; }
-.btn-primary { background-color: #409eff; }
-.btn-success { background-color: #67c23a; }
-.btn-secondary { background-color: #909399; }
-.table-container { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; }
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eef1f6; }
-th { background-color: #fafafa; font-weight: bold; color: #666; }
+/* 最终修复与美化版本 */
 
-/* 美化操作按钮 */
-.action-buttons {
-  display: flex;
-  gap: 6px;
+/* 全局变量，用于统一风格 */
+:root {
+  --primary-color: #409eff; --primary-hover: #66b1ff;
+  --success-color: #67c23a; --warning-color: #e6a23c; --danger-color: #f56c6c;
+  --text-primary: #303133; --text-regular: #606266; --text-secondary: #909399;
+  --border-color: #dcdfe6; --border-color-light: #e4e7ed;
+  --bg-color: #f5f7fa; --bg-card: #ffffff;
 }
 
-.action-btn {
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+/* 基础布局 */
+.expenses-view { padding: 25px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: var(--bg-color); }
+.view-header { text-align: center; margin-bottom: 25px; }
+.view-title { font-size: 1.75rem; font-weight: 600; color: var(--text-primary); }
+.view-description { font-size: 1rem; color: var(--text-regular); margin-top: 8px; }
 
-.detail-btn {
-  color: #409eff;
-  border: 1px solid #409eff;
-  background-color: #ffffff;
-}
+/* 工具栏 */
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.search-container { position: relative; width: 100%; max-width: 400px; }
+.search-input-wrapper { display: flex; align-items: center; }
+.search-icon { position: absolute; left: 15px; color: var(--text-secondary); }
+.search-input-wrapper input { flex-grow: 1; padding: 10px 75px 10px 40px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; transition: all 0.2s; }
+.search-input-wrapper input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.15); outline: none; }
+.search-buttons { display: flex; position: absolute; right: 5px; top: 50%; transform: translateY(-50%); }
+/* 修复 #8: 搜索按钮样式 */
+.action-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: none; background-color: #f4f4f5; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; font-size: 1rem; }
+.action-btn:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+.action-btn[title="搜索"]:hover { background-color: var(--primary-color); }
+.clear-button { background: #c8c9cc; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; transition: background-color 0.2s; }
+.clear-button:hover { background-color: #909399; }
 
-.detail-btn:hover {
-  background-color: #e6f4ff;
-}
+/* 按钮 */
+.btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease; }
+.btn:hover { transform: translateY(-2px); }
+.btn .fas { font-size: 1.1em; }
+.btn-primary { background-color: var(--primary-color); color: white; box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2); }
+.btn-primary:hover { background-color: var(--primary-hover); }
+.btn-secondary { background-color: #fff; color: var(--text-regular); border: 1px solid var(--border-color); }
+.btn-secondary:hover { color: var(--primary-color); border-color: var(--primary-color); background-color: #ecf5ff; }
+/* 新增：红色边框按钮类 */
+.btn-danger-outline { background-color: #fff; color: var(--danger-color); border: 1px solid var(--danger-color); }
+.btn-danger-outline:hover { background-color: #fef0f0; }
+/* 新增：红色背景按钮类 */
+.btn-danger { background-color: var(--danger-color); color: var(--text-primary); border: 1px solid var(--danger-color); box-shadow: 0 2px 8px rgba(245, 108, 108, 0.2); }
+.btn-danger:hover { background-color: #f89898; }
+.btn-danger i, .btn-danger span { color: var(--text-primary) !important; }
+.add-btn { background-color: #fff; color: var(--text-primary); border: 1px solid var(--border-color); }
+.add-btn:hover { background-color: var(--primary-color); color: #fff; border-color: var(--primary-color); }
 
-.edit-btn {
-  color: #e6a23c;
-  border: 1px solid #e6a23c;
-  background-color: #ffffff;
-}
+/* 数据卡片与表格 */
+.data-card { background: var(--bg-card); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+.table-responsive { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.data-table th, .data-table td { padding: 15px; text-align: left; border-bottom: 1px solid #f0f2f5; }
+.data-table thead th { background-color: #fafafa; font-weight: 600; color: #606266; position: sticky; top: 0; z-index: 1; }
+.data-table thead th:first-child { border-top-left-radius: 12px; }
+.data-table thead th:last-child { border-top-right-radius: 12px; }
+.table-row-hover { transition: background-color 0.3s ease; }
+.table-row-hover:hover { background: linear-gradient(90deg, rgba(236, 245, 255, 0.7), transparent); }
+.notes-cell { max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.edit-btn:hover {
-  background-color: #fff7e6;
-}
+/* 状态标签 */
+.tag { padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; font-weight: 500; display: inline-block; }
+.tag.success { background-color: #f0f9eb; color: #67c23a; }
+.tag.warning { background-color: #fdf6ec; color: #e6a23c; }
+.tag.danger { background-color: #fef0f0; color: #f56c6c; }
+.tag.info { background-color: #f4f4f5; color: #909399; }
+.tag.default { background-color: #e9e9eb; color: #909399; }
 
-.delete-btn {
-  color: #f56c6c;
-  border: 1px solid #f56c6c;
-  background-color: #ffffff;
-}
+/* 表格操作按钮 */
+.actions-cell { display: flex; gap: 10px; }
+.action-btn[title="查看详情"]:hover { background-color: var(--primary-color); }
+.action-btn[title="编辑"]:hover { background-color: var(--warning-color); }
+.action-btn[title="删除"]:hover { background-color: var(--danger-color); }
 
-.delete-btn:hover {
-  background-color: #ffe6e6;
-}
+/* 弹窗 */
+.modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(3px); animation: fadeIn 0.3s; }
+.modal-content { background: #fff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 700px; max-width: 95%; display: flex; flex-direction: column; max-height: 90vh; animation: slideUp 0.3s; }
+.modal-header { padding: 20px 25px; border-bottom: 1px solid #f0f2f5; display: flex; justify-content: space-between; align-items: center; }
+.modal-header h3 { margin: 0; font-size: 1.2rem; font-weight: 600; color: var(--text-primary); }
+.close-btn { background: none; border: none; font-size: 1.5rem; color: var(--text-secondary); cursor: pointer; }
+.modal-body { padding: 25px; overflow-y: auto; }
+.modal-footer { padding: 20px 25px; border-top: 1px solid #f0f2f5; display: flex; justify-content: flex-end; gap: 12px; }
 
-/* 弹窗样式优化 */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  backdrop-filter: blur(3px);
-}
+/* 表单 */
+.form-section { padding-bottom: 1.5rem; margin-bottom: 1.5rem; border-bottom: 1px dashed var(--border-color-light); }
+.form-section:last-child { margin-bottom: 0; border-bottom: none; }
+.section-title { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1.25rem; }
+.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px 25px; }
+.form-field { display: flex; flex-direction: column; }
+.form-field.full-span { grid-column: 1 / -1; }
+.form-field label { margin-bottom: 8px; font-weight: 500; color: var(--text-regular); }
+.input-wrapper { position: relative; display: flex; align-items: center; }
+.input-wrapper .fas, .input-wrapper > span { position: absolute; left: 15px; color: var(--text-secondary); font-size: 1rem; }
+.form-field input, .form-field select, .form-field textarea { width: 100%; padding: 10px 15px 10px 40px; border: 1px solid #dcdfe6; border-radius: 8px; font-size: 1rem; transition: all 0.2s; }
+.input-wrapper > span + input { padding-left: 30px; }
+.form-field select { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 0.8em; padding-right: 2.5rem; }
+.form-field textarea { resize: vertical; min-height: 80px; padding: 10px 15px; }
+.input-wrapper textarea ~ .fas { top: 15px; transform: none; }
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.15); }
 
-.modal-content {
-  position: relative;
-  border-radius: 12px;
-  background: white;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
+/* 删除确认弹窗 (修复 #2, #3) */
+.confirm-modal { background-color: #fff; width: 420px; text-align: center; border-radius: 12px; overflow: hidden; 
+  /* 修复 #2: 弹窗边框 */
+  border: 1px solid var(--danger-color); 
 }
-
-/* 新增/编辑老人弹窗 */
-.elder-modal {
-  width: 800px;
-  max-width: 95%;
-}
-
-/* 详情弹窗 */
-.detail-modal {
-  width: 750px;
-  max-width: 95%;
-}
-
-.modal-header {
-  padding: 18px 25px;
-  background-color: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #334155;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 20px;
-  color: #94a3b8;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.close-btn:hover {
-  color: #334155;
-}
-
-.modal-body {
-  padding: 25px;
-  overflow-y: auto;
-  flex-grow: 1;
-}
-
-.modal-footer {
-  padding: 15px 25px;
-  background-color: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-/* 表单网格布局 */
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px 25px;
-}
-
-.form-item {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-item label {
-  font-weight: 500;
-  color: #475569;
-  margin-bottom: 6px;
-  font-size: 14px;
-}
-
-.form-item input,
-.form-item textarea {
-  padding: 9px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 14px;
-  color: #334155;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.form-item input:focus,
-.form-item textarea:focus {
-  outline: none;
-  border-color: #409eff;
-  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.2);
-}
-
-.form-item textarea {
-  min-height: 80px;
-  resize: vertical;
-}
-
-.form-item.full-width {
-  grid-column: 1 / -1;
-}
-
-/* 详情弹窗的网格布局 */
-.detail-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px 25px;
-}
-
-.detail-item {
-  display: flex;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.detail-item strong {
-  color: #64748b;
-  min-width: 120px;
-  font-weight: 500;
-}
-
-.detail-item span {
-  color: #334155;
-  flex: 1;
-}
-
-.detail-item.full-width {
-  grid-column: 1 / -1;
-}
-
-/* 删除确认对话框 */
-.custom-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.custom-modal-content {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  width: 380px;
-  max-width: 90%;
-  overflow: hidden;
-}
-
-.modal-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #334155;
-  margin: 0;
-}
-
-.text-danger { color: #ef4444; }
-.text-2xl { font-size: 24px; }
-.text-gray-500 { color: #64748b; }
-.text-sm { font-size: 12px; }
-.btn-danger { background-color: #ef4444; }
-.btn-danger:hover { background-color: #dc2626; }
+.confirm-icon-wrapper { background-color: #fef0f0; padding: 30px; }
+.confirm-icon { color: var(--danger-color); font-size: 2.5rem; }
+.confirm-content { padding: 25px; }
+.confirm-title { font-size: 1.5rem; font-weight: 600; color: var(--text-primary); }
+.confirm-message { font-size: 1rem; color: var(--text-regular); margin-top: 10px; }
+.confirm-submessage { font-size: 0.9rem; color: var(--text-secondary); margin-top: 5px; margin-bottom: 25px; }
+.confirm-actions { display: flex; justify-content: center; gap: 15px; }
 
 /* 动画效果 */
-.modal-content {
-  animation: fadeIn 0.3s ease-out;
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
+/* 其余弹窗和通知样式 */
+.empty-row td, .loading-placeholder { padding: 60px 0; text-align: center; color: var(--text-secondary); }
+.loading-spinner { width: 40px; height: 40px; border: 4px solid #f0f2f5; border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* 美化提交按钮 */
-.btn-primary {
-  background-color: #409eff;
-  color: white;
-  font-weight: 500;
-  padding: 9px 16px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border: none;
-}
-
-.btn-primary:hover {
-  background-color: #368ee0;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.btn-primary:active {
-  transform: translateY(0);
-  box-shadow: none;
-}
-
-.btn-secondary {
-  background-color: #909399;
-  color: white;
-  font-weight: 500;
-  padding: 9px 16px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border: none;
-}
-
-.btn-secondary:hover {
-  background-color: #808389;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.btn-secondary:active {
-  transform: translateY(0);
-  box-shadow: none;
-}
-</style>    
+.detail-modal .item-label { color: #6c757d; font-size: 0.9rem; margin-bottom: 6px; display: flex; align-items: center; }
+.detail-modal .item-value { font-size: 1rem; padding: 10px 15px; background-color: #f8f9fa; border-radius: 8px; min-height: 20px; word-break: break-all; }
+.detail-modal .note-value { white-space: pre-wrap; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 30px; }
+.detail-item { display: flex; flex-direction: column; }
+.detail-item.full-span { grid-column: 1 / -1; }
+.item-label .fas { margin-right: 8px; width: 14px; text-align: center; }
+</style>  
