@@ -1,20 +1,29 @@
 package com.yusheng.pojo;
 
-import com.fasterxml.jackson.annotation.JsonFormat; // <<--- 导入这个注解
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import jakarta.persistence.Entity; // <-- 新增导入
+import jakarta.persistence.Id; // <-- 新增导入
+import jakarta.persistence.GeneratedValue; // <-- 新增导入
+import jakarta.persistence.GenerationType; // <-- 新增导入
+import jakarta.persistence.Table; // <-- 新增导入 (可选，但推荐)
+
 import java.math.BigDecimal;
-import java.time.LocalDate; // 我们依然建议将 checkInDate 改为 LocalDate
 import java.time.LocalDateTime;
 
 @Data
+@Entity // <<--- 必须添加这个注解
+@Table(name = "elders") // <<--- 推荐添加，确保映射到正确的表名，通常是小写单数
 public class Elder {
-    private Integer id;
+    @Id // <<--- 必须标注主键
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // <<--- 标注主键生成策略，IDENTITY 表示数据库自增
+    private Integer id; // 确保与数据库字段类型匹配
     private String name;
     private Integer age;
-    private String birthDate;
+    private String birthDate; // 如果数据库是 DATE 类型，建议使用 java.time.LocalDate
     private String ethnicity;
     private String account;
-    private String password;
+    private String password; // ⚠️ 安全提醒：密码不应明文存储，通常应使用加密
     private String education;
     private String maritalStatus;
     private String hobbies;
@@ -23,12 +32,8 @@ public class Elder {
     private String feeType;
     private BigDecimal expenses;
     private String relativeContact;
-    private String bedNumber;
+    private String bedNumber; // 如果 bedNumber 是外键或关联实体，需要用 @ManyToOne/@OneToOne 注解
 
-    // --- 核心修改在这里 ---
-
-    // 对于需要精确时间的字段，使用 LocalDateTime 并加上注解
-    // 这个注解会告诉 Jackson 如何将后端的数据格式化成 "yyyy-MM-dd HH:mm:ss" 字符串返回给前端
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
     private LocalDateTime checkInDate;
 

@@ -5,8 +5,10 @@ com\yusheng\mapper\CareWorkersMapper.class
 com\yusheng\utils\JwtUtils.class
 com\yusheng\controller\CareWorkersController.class
 com\yusheng\config\JwtAuthenticationTokenFilter.class
+com\yusheng\controller\StatisticController.class
 com\yusheng\pojo\CareWorker.class
 com\yusheng\config\JwtAuthenticationEntryPoint.class
+com\yusheng\repository\ExpensesRepository.class
 com\yusheng\service\impl\HealthRecordsServiceImpl.class
 com\yusheng\service\ElderSelfService.class
 com\yusheng\pojo\CareWorkerInfo.class
@@ -32,7 +34,9 @@ com\yusheng\mapper\BedsMapper.class
 com\yusheng\service\impl\AdminServiceImpl.class
 com\yusheng\service\impl\CareWorkersSelfServiceImpl.class
 com\yusheng\service\impl\ElderServiceImpl.class
+com\yusheng\repository\ElderRepository.class
 com\yusheng\pojo\HealthRecord.class
+com\yusheng\common\Result.class
 com\yusheng\pojo\Elder.class
 com\yusheng\service\impl\CareWorkersServiceImpl.class
 com\yusheng\config\RestfulAccessDeniedHandler.class
@@ -41,7 +45,10 @@ com\yusheng\controller\ElderSelfController.class
 com\yusheng\mapper\AdminMapper.class
 com\yusheng\pojo\Bed.class
 com\yusheng\service\HealthRecordsService.class
+com\yusheng\service\StatisticService.class
+com\yusheng\dto\HomeViewStatsDto.class
 com\yusheng\pojo\Expense.class
+com\yusheng\repository\BedRepository.class
 com\yusheng\service\ElderService.class
 com\yusheng\service\impl\BedsServiceImpl.class
 com\yusheng\controller\CareWorkersSelfController.class

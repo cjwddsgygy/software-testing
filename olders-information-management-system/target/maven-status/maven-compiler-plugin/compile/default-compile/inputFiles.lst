@@ -1,3 +1,4 @@
+C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\common\Result.java
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\config\JwtAuthenticationEntryPoint.java
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\config\JwtAuthenticationTokenFilter.java
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\config\RestfulAccessDeniedHandler.java
@@ -11,6 +12,8 @@ C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-tes
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\controller\ExpensesController.java
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\controller\HealthRecordsController.java
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\controller\LoginController.java
+C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\controller\StatisticController.java
+C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\dto\HomeViewStatsDto.java
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\mapper\AdminMapper.java
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\mapper\BedsMapper.java
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\mapper\CareWorkersMapper.java
@@ -30,6 +33,9 @@ C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-tes
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\pojo\Expense.java
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\pojo\HealthRecord.java
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\pojo\Result.java
+C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\repository\BedRepository.java
+C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\repository\ElderRepository.java
+C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\repository\ExpensesRepository.java
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\service\AdminService.java
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\service\BedsService.java
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\service\CareWorkersSelfService.java
@@ -46,4 +52,5 @@ C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-tes
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\service\impl\ElderServiceImpl.java
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\service\impl\ExpensesServiceImpl.java
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\service\impl\HealthRecordsServiceImpl.java
+C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\service\StatisticService.java
 C:\Users\123\Desktop\课程设计资料（给学生）\课程设计\software-testing-backend\olders-information-management-system\src\main\java\com\yusheng\utils\JwtUtils.java

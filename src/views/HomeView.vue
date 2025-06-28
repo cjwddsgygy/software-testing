@@ -28,7 +28,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
-import apiClient from '@/api/request'; // 假设您的API请求工具
+import apiClient from '@/api/request'; // 您的API请求工具
 
 const stats = ref({});
 const loading = ref(true);
@@ -36,33 +36,21 @@ const loading = ref(true);
 const fetchStats = async () => {
   loading.value = true;
   try {
-    // 模拟API请求
-    const response = await new Promise(resolve => {
-      setTimeout(() => {
-        resolve({
-          data: {
-            code: 0,
-            data: {
-              totalOlders: 125,
-              totalBeds: 150,
-              availableBeds: 25,
-              totalCharges: 12,
-              // 可以添加更多统计数据
-              occupiedBeds: 125,
-              careworkerCount: 18,
-            }
-          }
-        });
-      }, 800); // 模拟网络延迟
-    });
-
+    // 关键：调用后端统计接口
+    const response = await apiClient.get('/stats/overview'); 
+    
+    // 根据您后端 Result 类的 code 字段判断
     if (response.data.code === 0) {
       stats.value = response.data.data;
     } else {
-      throw new Error(response.data.msg || '获取统计数据失败');
+      // 这里的错误信息通常会通过 apiClient 的响应拦截器处理，并弹出 ElMessage
+      throw new Error(response.data.message || '获取统计数据失败'); 
     }
   } catch (error) {
-    ElMessage.error(error.message || '网络错误，无法加载统计数据');
+    console.error("HomeView 获取统计数据失败:", error);
+    // ElMessage.error(error.message || '网络错误，无法加载统计数据'); // 这行通常会被拦截器处理掉
+    
+    // 当请求失败时，为 stats 设置默认值，避免页面显示空
     stats.value = {
       totalOlders: 'N/A',
       totalBeds: 'N/A',
@@ -78,6 +66,7 @@ onMounted(fetchStats);
 </script>
 
 <style scoped>
+/* 样式保持不变 */
 .home-view {
   padding: 20px;
   font-family: 'Arial', sans-serif;
