@@ -11,7 +11,7 @@
  Target Server Version : 80042
  File Encoding         : 65001
 
- Date: 28/06/2025 22:16:55
+ Date: 29/06/2025 11:16:52
 */
 
 SET NAMES utf8mb4;
@@ -45,9 +45,9 @@ CREATE TABLE `beds`  (
   `id` int NOT NULL AUTO_INCREMENT,
   `elders_id` int NULL DEFAULT NULL COMMENT '老人编号',
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '老人姓名',
-  `room_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '房间号',
-  `bed_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '床位号',
-  `status` enum('空闲','占用') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '空闲' COMMENT '状态',
+  `room_number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `bed_number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
@@ -55,7 +55,7 @@ CREATE TABLE `beds`  (
   INDEX `name`(`name` ASC) USING BTREE,
   CONSTRAINT `elders_id` FOREIGN KEY (`elders_id`) REFERENCES `elders` (`elders_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `name` FOREIGN KEY (`name`) REFERENCES `elders` (`name`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 35 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 36 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of beds
@@ -98,29 +98,29 @@ INSERT INTO `beds` VALUES (34, NULL, NULL, '1', '1', '空闲', '2025-06-28 10:42
 DROP TABLE IF EXISTS `care_workers`;
 CREATE TABLE `care_workers`  (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '姓名',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   `age` int NOT NULL COMMENT '年龄',
-  `birth_date` date NOT NULL COMMENT '出生日期',
-  `ethnicity` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '民族',
-  `account` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '账号',
+  `birth_date` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `ethnicity` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `account` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '状态：在职、休假',
-  `education` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '学历',
-  `experience` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '工作经验',
-  `specialties` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '特长',
-  `assigned_elders` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '负责老人列表（可存ID数组或JSON）',
+  `education` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `experience` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `specialties` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `assigned_elders` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `account`(`account` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 43 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 44 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of care_workers
 -- ----------------------------
-INSERT INTO `care_workers` VALUES (1, '张丽华', 35, '1990-04-16', '汉族', 'zhanglihua11', '123456', '1', '大专', '5年养老院经验', '康复训练,心理疏导', '王建国,李秀兰,刘志强', '2025-06-23 20:46:17', '2025-06-28 07:30:39');
+INSERT INTO `care_workers` VALUES (1, '张丽华', 35, '1990-04-16', '汉族', 'zhanglihua11', '123456', '在职', '大专', '5年养老院经验', '康复训练,心理疏导', '王建国,李秀兰,刘志强', '2025-06-23 20:46:17', '2025-06-29 10:08:20');
 INSERT INTO `care_workers` VALUES (2, '王强', 40, '1985-07-22', '汉族', 'worker_002', '123456', '1', '本科', '8年医院护理经验', '急救处理,用药指导', '陈美玲,赵文斌,孙丽娟', '2025-06-23 20:46:17', '2025-06-28 07:30:26');
-INSERT INTO `care_workers` VALUES (3, '李娟', 32, '1993-02-10', '汉族', 'worker_003', '123456', '1', '中专', '3年社区护理经验', '生活照料,饮食管理', '周志刚,黄秀英,吴建国', '2025-06-23 20:46:17', '2025-06-28 07:30:25');
+INSERT INTO `care_workers` VALUES (3, '李娟', 32, '1993-02-10', '汉族', 'worker_003', '123456', '休假', '中专', '3年社区护理经验', '生活照料,饮食管理', '周志刚,黄秀英,吴建国', '2025-06-23 20:46:17', '2025-06-29 10:08:24');
 INSERT INTO `care_workers` VALUES (4, '刘芳', 36, '1989-09-05', '汉族', 'worker_004', '123456', '1', '大专', '6年养老机构经验', '褥疮护理,康复按摩', '郑小红,许志远,张慧敏', '2025-06-23 20:46:17', '2025-06-28 07:30:26');
 INSERT INTO `care_workers` VALUES (5, '赵磊', 38, '1987-01-18', '汉族', 'worker_005', '123456', '1', '本科', '7年老年科护理经验', '认知障碍照护,情绪安抚', '马建国,朱小梅,宋建国', '2025-06-23 20:46:17', '2025-06-28 07:30:25');
 INSERT INTO `care_workers` VALUES (6, '周敏', 34, '1991-11-30', '汉族', 'worker_006', '123456', '1', '大专', '4年居家护理经验', '助浴,助餐服务', '林秀兰,杨建国,何秀英', '2025-06-23 20:46:17', '2025-06-28 07:30:24');
@@ -155,21 +155,21 @@ INSERT INTO `care_workers` VALUES (30, '潘芳', 35, '1990-03-22', '汉族', 'pa
 DROP TABLE IF EXISTS `elders`;
 CREATE TABLE `elders`  (
   `elders_id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '姓名',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   `age` int NOT NULL COMMENT '年龄',
-  `birth_date` date NOT NULL COMMENT '出生日期',
-  `ethnicity` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '民族',
-  `account` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '账号',
+  `birth_date` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `ethnicity` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `account` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
-  `education` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '学历',
-  `marital_status` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '婚姻状况',
-  `hobbies` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '爱好',
-  `care_level` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '护理级别',
-  `medical_care` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '医疗管理',
-  `fee_type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '收费类型',
-  `expenses` decimal(10, 2) NULL DEFAULT NULL COMMENT '费用支出',
-  `relative_contact` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '亲属联系方式',
-  `bed_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '床位号',
+  `education` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `marital_status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `hobbies` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `care_level` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `medical_care` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `fee_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `expenses` decimal(38, 2) NULL DEFAULT NULL,
+  `relative_contact` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `bed_number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   `check_in_date` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '入院时间',
   `check_out_date` datetime NULL DEFAULT NULL COMMENT '出院时间',
   `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP,
@@ -177,7 +177,7 @@ CREATE TABLE `elders`  (
   PRIMARY KEY (`elders_id`) USING BTREE,
   UNIQUE INDEX `account`(`account` ASC) USING BTREE,
   INDEX `name`(`name` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 45 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 52 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of elders
@@ -213,6 +213,7 @@ INSERT INTO `elders` VALUES (28, '秦秀兰', 76, '1949-09-05', '汉族', 'elder
 INSERT INTO `elders` VALUES (29, '罗建国', 80, '1945-12-25', '汉族', 'elder_029', '123456', '高中', '已婚', '听广播,看报纸', '一级护理', '脑萎缩', '全包', 3400.00, '罗小红 13800138028', 'A129', '2025-03-04 20:37:40', NULL, '2025-06-23 20:37:40', '2025-06-23 20:56:28');
 INSERT INTO `elders` VALUES (30, '朱明远', 77, '1948-02-11', '汉族', 'elder_030', '123456', '本科', '已婚', '摄影,写作', '二级护理', '高血脂', '全包', 3100.00, '朱小雨 13800138029', 'A130', '2024-09-29 20:37:40', NULL, '2025-06-23 20:37:40', '2025-06-23 20:56:28');
 INSERT INTO `elders` VALUES (35, '牢王', 131, '2025-06-27', '汉族', 'laowang', NULL, '', '', '', '1', '', '月结', NULL, '', 'D111', '2025-06-27 22:51:22', NULL, '2025-06-27 22:51:22', '2025-06-27 22:51:22');
+INSERT INTO `elders` VALUES (51, '1', 1, '2025-06-28', '11', '1', '1', '', '', '', '', '', '月结', NULL, '', '', '2025-06-28 23:43:31', NULL, '2025-06-28 23:43:31', '2025-06-28 23:43:31');
 
 -- ----------------------------
 -- Table structure for expenses
@@ -220,12 +221,12 @@ INSERT INTO `elders` VALUES (35, '牢王', 131, '2025-06-27', '汉族', 'laowang
 DROP TABLE IF EXISTS `expenses`;
 CREATE TABLE `expenses`  (
   `id` int NOT NULL AUTO_INCREMENT,
-  `elder` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '老人',
-  `item_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '费用项目名称',
-  `amount` decimal(10, 2) NOT NULL COMMENT '金额',
+  `elder` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `item_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `amount` decimal(38, 2) NULL DEFAULT NULL,
   `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '支付情况',
-  `remark` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '备注',
-  `expense_date` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `expense_date` date NULL DEFAULT NULL,
   `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
@@ -235,98 +236,97 @@ CREATE TABLE `expenses`  (
 -- ----------------------------
 -- Records of expenses
 -- ----------------------------
-INSERT INTO `expenses` VALUES (1, '王建国', '住宿费', 1131.92, '已支付', '2025-07月', '2025-02-10 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (2, '李秀兰', '住宿费', 1094.66, '未支付', '2025-09月', '2025-06-17 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (3, '刘志强', '住宿费', 1011.19, '未支付', '2025-01月', '2025-01-06 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (4, '陈美玲', '住宿费', 1339.58, '已支付', '2025-08月', '2025-01-13 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (5, '赵文斌', '住宿费', 1363.95, '未支付', '2025-12月', '2025-03-17 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (6, '孙丽娟', '住宿费', 1447.11, '已支付', '2025-10月', '2025-03-30 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (7, '周志刚', '住宿费', 1442.53, '已支付', '2025-12月', '2025-04-25 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (8, '黄秀英', '住宿费', 1330.26, '已支付', '2025-04月', '2025-03-12 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (9, '吴建国', '住宿费', 1472.82, '未支付', '2025-01月', '2025-05-25 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (10, '郑小红', '住宿费', 1408.83, '已支付', '2025-08月', '2025-03-19 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (11, '徐志远', '住宿费', 1440.13, '已支付', '2025-10月', '2025-04-22 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (12, '张慧敏', '住宿费', 1171.86, '未支付', '2025-09月', '2025-04-21 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (13, '马建国', '住宿费', 1365.70, '未支付', '2025-08月', '2025-01-29 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (14, '朱小梅', '住宿费', 1115.34, '已支付', '2025-09月', '2024-12-29 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (15, '宋建国', '住宿费', 1353.14, '未支付', '2025-08月', '2025-01-29 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (16, '林秀兰', '住宿费', 1137.30, '已支付', '2025-12月', '2025-01-03 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (17, '杨建国', '住宿费', 1449.42, '已支付', '2025-08月', '2025-03-29 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (18, '何秀英', '住宿费', 1246.02, '未支付', '2025-01月', '2025-03-02 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (19, '许建国', '住宿费', 1047.44, '已支付', '2025-07月', '2025-03-06 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (20, '蒋秀兰', '住宿费', 1152.74, '未支付', '2025-09月', '2025-03-08 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (21, '沈建国', '住宿费', 1438.06, '已支付', '2025-08月', '2025-04-26 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (22, '韩秀兰', '住宿费', 1420.59, '未支付', '2025-03月', '2025-02-23 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (23, '程建国', '住宿费', 1319.52, '已支付', '2025-03月', '2024-12-27 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (24, '董秀英', '住宿费', 1205.41, '未支付', '2025-01月', '2025-05-24 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (25, '梁建国', '住宿费', 1306.19, '未支付', '2025-07月', '2025-01-11 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (26, '蔡秀兰', '住宿费', 1448.63, '未支付', '2025-10月', '2025-06-05 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (27, '潘建国', '住宿费', 1123.01, '已支付', '2025-11月', '2025-01-23 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (28, '秦秀兰', '住宿费', 1227.83, '未支付', '2025-10月', '2025-04-10 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (29, '罗建国', '住宿费', 1405.04, '未支付', '2025-10月', '2025-03-11 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (30, '朱明远', '住宿费', 1251.95, '已支付', '2025-10月', '2025-04-21 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (32, '王建国', '护理费', 719.53, '未支付', '一级护理', '2025-04-15 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (33, '李秀兰', '护理费', 759.97, '未支付', '二级护理', '2025-03-06 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (34, '刘志强', '护理费', 870.02, '未支付', '三级护理', '2025-05-26 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (35, '陈美玲', '护理费', 582.18, '未支付', '二级护理', '2025-05-11 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (36, '赵文斌', '护理费', 583.95, '未支付', '一级护理', '2025-06-11 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (37, '孙丽娟', '护理费', 997.01, '已支付', '三级护理', '2025-01-20 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (38, '周志刚', '护理费', 994.35, '已支付', '二级护理', '2025-01-18 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (39, '黄秀英', '护理费', 628.32, '未支付', '三级护理', '2025-03-13 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (40, '吴建国', '护理费', 918.49, '已支付', '二级护理', '2025-01-13 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (41, '郑小红', '护理费', 514.54, '已支付', '二级护理', '2025-05-14 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (42, '徐志远', '护理费', 863.75, '已支付', '三级护理', '2025-02-24 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (43, '张慧敏', '护理费', 707.88, '未支付', '一级护理', '2025-05-23 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (44, '马建国', '护理费', 808.84, '未支付', '二级护理', '2024-12-30 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (45, '朱小梅', '护理费', 594.65, '已支付', '一级护理', '2025-03-25 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (46, '宋建国', '护理费', 733.34, '未支付', '三级护理', '2025-02-10 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (47, '林秀兰', '护理费', 611.92, '已支付', '三级护理', '2025-01-31 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (48, '杨建国', '护理费', 653.19, '未支付', '一级护理', '2025-02-04 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (49, '何秀英', '护理费', 733.06, '未支付', '一级护理', '2025-03-07 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (50, '许建国', '护理费', 508.74, '已支付', '一级护理', '2025-04-25 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (51, '蒋秀兰', '护理费', 906.93, '未支付', '一级护理', '2024-12-30 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (52, '沈建国', '护理费', 818.09, '未支付', '一级护理', '2025-04-25 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (53, '韩秀兰', '护理费', 960.48, '未支付', '二级护理', '2025-05-07 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (54, '程建国', '护理费', 749.96, '未支付', '三级护理', '2025-06-14 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (55, '董秀英', '护理费', 564.01, '未支付', '二级护理', '2025-06-16 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (56, '梁建国', '护理费', 871.89, '已支付', '二级护理', '2025-02-05 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (57, '蔡秀兰', '护理费', 523.25, '已支付', '三级护理', '2025-03-29 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (58, '潘建国', '护理费', 818.46, '已支付', '三级护理', '2025-02-03 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (59, '秦秀兰', '护理费', 849.48, '未支付', '一级护理', '2025-03-02 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (60, '罗建国', '护理费', 860.20, '已支付', '三级护理', '2025-04-17 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (61, '朱明远', '护理费', 879.67, '已支付', '三级护理', '2025-06-13 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (63, '王建国', '伙食费', 389.07, '未支付', '标准餐', '2025-03-02 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (64, '李秀兰', '伙食费', 375.15, '未支付', '标准餐', '2025-06-21 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (65, '刘志强', '伙食费', 306.71, '已支付', '标准餐', '2025-05-11 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (66, '陈美玲', '伙食费', 308.21, '已支付', '标准餐', '2025-01-01 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (67, '赵文斌', '伙食费', 475.28, '未支付', '标准餐', '2025-04-09 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (68, '孙丽娟', '伙食费', 300.82, '已支付', '定制餐', '2025-02-11 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (69, '周志刚', '伙食费', 432.81, '已支付', '定制餐', '2025-02-23 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (70, '黄秀英', '伙食费', 403.02, '未支付', '定制餐', '2025-03-20 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (71, '吴建国', '伙食费', 455.56, '已支付', '定制餐', '2025-04-05 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (72, '郑小红', '伙食费', 363.11, '未支付', '定制餐', '2025-06-23 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (73, '徐志远', '伙食费', 548.90, '未支付', '标准餐', '2025-05-14 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (74, '张慧敏', '伙食费', 507.73, '未支付', '定制餐', '2025-01-17 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (75, '马建国', '伙食费', 598.43, '已支付', '标准餐', '2025-02-01 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (76, '朱小梅', '伙食费', 565.31, '未支付', '标准餐', '2025-03-06 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (77, '宋建国', '伙食费', 567.29, '未支付', '定制餐', '2025-04-03 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (78, '林秀兰', '伙食费', 419.46, '已支付', '定制餐', '2025-01-06 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (79, '杨建国', '伙食费', 540.37, '未支付', '标准餐', '2025-03-10 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (80, '何秀英', '伙食费', 404.37, '未支付', '定制餐', '2025-01-26 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (81, '许建国', '伙食费', 359.56, '已支付', '定制餐', '2025-06-22 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (82, '蒋秀兰', '伙食费', 447.17, '已支付', '标准餐', '2025-03-02 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (83, '沈建国', '伙食费', 565.64, '已支付', '定制餐', '2025-06-16 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (84, '韩秀兰', '伙食费', 477.59, '未支付', '定制餐', '2025-04-14 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (85, '程建国', '伙食费', 434.52, '已支付', '标准餐', '2025-06-20 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (86, '董秀英', '伙食费', 567.16, '已支付', '标准餐', '2025-05-08 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (87, '梁建国', '伙食费', 340.33, '已支付', '定制餐', '2025-06-09 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (88, '蔡秀兰', '伙食费', 513.20, '未支付', '标准餐', '2025-04-07 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (89, '潘建国', '伙食费', 366.70, '未支付', '定制餐', '2025-04-11 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (90, '秦秀兰', '伙食费', 479.86, '已支付', '定制餐', '2025-06-14 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (91, '罗建国', '伙食费', 587.52, '已支付', '定制餐', '2025-05-05 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (92, '朱明远', '伙食费', 445.73, '已支付', '定制餐', '2025-03-15 20:50:20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
-INSERT INTO `expenses` VALUES (95, '1', '1', 1.00, '未支付', '1', '2025-06-28 00:00:00', '2025-06-28 13:16:45', '2025-06-28 13:16:45');
-INSERT INTO `expenses` VALUES (96, '1', '1', 1.00, '未支付', '1', '2025-06-28 00:00:00', '2025-06-28 13:17:25', '2025-06-28 13:17:25');
+INSERT INTO `expenses` VALUES (1, '王建国', '住宿费', 1131.92, '已支付', '2025-07月', '2025-02-10', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (2, '李秀兰', '住宿费', 1094.66, '未支付', '2025-09月', '2025-06-17', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (3, '刘志强', '住宿费', 1011.19, '未支付', '2025-01月', '2025-01-06', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (4, '陈美玲', '住宿费', 1339.58, '已支付', '2025-08月', '2025-01-13', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (5, '赵文斌', '住宿费', 1363.95, '未支付', '2025-12月', '2025-03-17', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (6, '孙丽娟', '住宿费', 1447.11, '已支付', '2025-10月', '2025-03-30', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (7, '周志刚', '住宿费', 1442.53, '已支付', '2025-12月', '2025-04-25', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (8, '黄秀英', '住宿费', 1330.26, '已支付', '2025-04月', '2025-03-12', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (9, '吴建国', '住宿费', 1472.82, '未支付', '2025-01月', '2025-05-25', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (10, '郑小红', '住宿费', 1408.83, '已支付', '2025-08月', '2025-03-19', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (11, '徐志远', '住宿费', 1440.13, '已支付', '2025-10月', '2025-04-22', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (12, '张慧敏', '住宿费', 1171.86, '未支付', '2025-09月', '2025-04-21', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (13, '马建国', '住宿费', 1365.70, '未支付', '2025-08月', '2025-01-29', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (14, '朱小梅', '住宿费', 1115.34, '已支付', '2025-09月', '2024-12-29', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (15, '宋建国', '住宿费', 1353.14, '未支付', '2025-08月', '2025-01-29', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (16, '林秀兰', '住宿费', 1137.30, '已支付', '2025-12月', '2025-01-03', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (17, '杨建国', '住宿费', 1449.42, '已支付', '2025-08月', '2025-03-29', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (18, '何秀英', '住宿费', 1246.02, '未支付', '2025-01月', '2025-03-02', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (19, '许建国', '住宿费', 1047.44, '已支付', '2025-07月', '2025-03-06', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (20, '蒋秀兰', '住宿费', 1152.74, '未支付', '2025-09月', '2025-03-08', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (21, '沈建国', '住宿费', 1438.06, '已支付', '2025-08月', '2025-04-26', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (22, '韩秀兰', '住宿费', 1420.59, '未支付', '2025-03月', '2025-02-23', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (23, '程建国', '住宿费', 1319.52, '已支付', '2025-03月', '2024-12-27', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (24, '董秀英', '住宿费', 1205.41, '未支付', '2025-01月', '2025-05-24', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (25, '梁建国', '住宿费', 1306.19, '未支付', '2025-07月', '2025-01-11', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (26, '蔡秀兰', '住宿费', 1448.63, '未支付', '2025-10月', '2025-06-05', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (27, '潘建国', '住宿费', 1123.01, '已支付', '2025-11月', '2025-01-23', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (28, '秦秀兰', '住宿费', 1227.83, '未支付', '2025-10月', '2025-04-10', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (29, '罗建国', '住宿费', 1405.04, '未支付', '2025-10月', '2025-03-11', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (30, '朱明远', '住宿费', 1251.95, '已支付', '2025-10月', '2025-04-21', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (32, '王建国', '护理费', 719.53, '未支付', '一级护理', '2025-04-15', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (33, '李秀兰', '护理费', 759.97, '未支付', '二级护理', '2025-03-06', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (34, '刘志强', '护理费', 870.02, '未支付', '三级护理', '2025-05-26', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (35, '陈美玲', '护理费', 582.18, '未支付', '二级护理', '2025-05-11', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (36, '赵文斌', '护理费', 583.95, '未支付', '一级护理', '2025-06-11', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (37, '孙丽娟', '护理费', 997.01, '已支付', '三级护理', '2025-01-20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (38, '周志刚', '护理费', 994.35, '已支付', '二级护理', '2025-01-18', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (39, '黄秀英', '护理费', 628.32, '未支付', '三级护理', '2025-03-13', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (40, '吴建国', '护理费', 918.49, '已支付', '二级护理', '2025-01-13', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (41, '郑小红', '护理费', 514.54, '已支付', '二级护理', '2025-05-14', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (42, '徐志远', '护理费', 863.75, '已支付', '三级护理', '2025-02-24', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (43, '张慧敏', '护理费', 707.88, '未支付', '一级护理', '2025-05-23', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (44, '马建国', '护理费', 808.84, '未支付', '二级护理', '2024-12-30', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (45, '朱小梅', '护理费', 594.65, '已支付', '一级护理', '2025-03-25', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (46, '宋建国', '护理费', 733.34, '未支付', '三级护理', '2025-02-10', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (47, '林秀兰', '护理费', 611.92, '已支付', '三级护理', '2025-01-31', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (48, '杨建国', '护理费', 653.19, '未支付', '一级护理', '2025-02-04', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (49, '何秀英', '护理费', 733.06, '未支付', '一级护理', '2025-03-07', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (50, '许建国', '护理费', 508.74, '已支付', '一级护理', '2025-04-25', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (51, '蒋秀兰', '护理费', 906.93, '未支付', '一级护理', '2024-12-30', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (52, '沈建国', '护理费', 818.09, '未支付', '一级护理', '2025-04-25', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (53, '韩秀兰', '护理费', 960.48, '未支付', '二级护理', '2025-05-07', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (54, '程建国', '护理费', 749.96, '未支付', '三级护理', '2025-06-14', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (55, '董秀英', '护理费', 564.01, '未支付', '二级护理', '2025-06-16', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (56, '梁建国', '护理费', 871.89, '已支付', '二级护理', '2025-02-05', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (57, '蔡秀兰', '护理费', 523.25, '已支付', '三级护理', '2025-03-29', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (58, '潘建国', '护理费', 818.46, '已支付', '三级护理', '2025-02-03', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (59, '秦秀兰', '护理费', 849.48, '未支付', '一级护理', '2025-03-02', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (60, '罗建国', '护理费', 860.20, '已支付', '三级护理', '2025-04-17', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (61, '朱明远', '护理费', 879.67, '已支付', '三级护理', '2025-06-13', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (63, '王建国', '伙食费', 389.07, '未支付', '标准餐', '2025-03-02', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (64, '李秀兰', '伙食费', 375.15, '未支付', '标准餐', '2025-06-21', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (65, '刘志强', '伙食费', 306.71, '已支付', '标准餐', '2025-05-11', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (66, '陈美玲', '伙食费', 308.21, '已支付', '标准餐', '2025-01-01', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (67, '赵文斌', '伙食费', 475.28, '未支付', '标准餐', '2025-04-09', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (68, '孙丽娟', '伙食费', 300.82, '已支付', '定制餐', '2025-02-11', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (69, '周志刚', '伙食费', 432.81, '已支付', '定制餐', '2025-02-23', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (70, '黄秀英', '伙食费', 403.02, '未支付', '定制餐', '2025-03-20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (71, '吴建国', '伙食费', 455.56, '已支付', '定制餐', '2025-04-05', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (72, '郑小红', '伙食费', 363.11, '未支付', '定制餐', '2025-06-23', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (73, '徐志远', '伙食费', 548.90, '未支付', '标准餐', '2025-05-14', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (74, '张慧敏', '伙食费', 507.73, '未支付', '定制餐', '2025-01-17', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (75, '马建国', '伙食费', 598.43, '已支付', '标准餐', '2025-02-01', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (76, '朱小梅', '伙食费', 565.31, '未支付', '标准餐', '2025-03-06', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (77, '宋建国', '伙食费', 567.29, '未支付', '定制餐', '2025-04-03', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (78, '林秀兰', '伙食费', 419.46, '已支付', '定制餐', '2025-01-06', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (79, '杨建国', '伙食费', 540.37, '未支付', '标准餐', '2025-03-10', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (80, '何秀英', '伙食费', 404.37, '未支付', '定制餐', '2025-01-26', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (81, '许建国', '伙食费', 359.56, '已支付', '定制餐', '2025-06-22', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (82, '蒋秀兰', '伙食费', 447.17, '已支付', '标准餐', '2025-03-02', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (83, '沈建国', '伙食费', 565.64, '已支付', '定制餐', '2025-06-16', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (84, '韩秀兰', '伙食费', 477.59, '未支付', '定制餐', '2025-04-14', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (85, '程建国', '伙食费', 434.52, '已支付', '标准餐', '2025-06-20', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (86, '董秀英', '伙食费', 567.16, '已支付', '标准餐', '2025-05-08', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (87, '梁建国', '伙食费', 340.33, '已支付', '定制餐', '2025-06-09', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (88, '蔡秀兰', '伙食费', 513.20, '未支付', '标准餐', '2025-04-07', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (89, '潘建国', '伙食费', 366.70, '未支付', '定制餐', '2025-04-11', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (90, '秦秀兰', '伙食费', 479.86, '已支付', '定制餐', '2025-06-14', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (91, '罗建国', '伙食费', 587.52, '已支付', '定制餐', '2025-05-05', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (92, '朱明远', '伙食费', 445.73, '已支付', '定制餐', '2025-03-15', '2025-06-23 20:50:20', '2025-06-28 08:44:41');
+INSERT INTO `expenses` VALUES (95, '1', '1', 1.00, '未支付', '1', '2025-06-28', '2025-06-28 13:16:45', '2025-06-28 13:16:45');
 
 -- ----------------------------
 -- Table structure for health_records
@@ -334,16 +334,16 @@ INSERT INTO `expenses` VALUES (96, '1', '1', 1.00, '未支付', '1', '2025-06-28
 DROP TABLE IF EXISTS `health_records`;
 CREATE TABLE `health_records`  (
   `id` int NOT NULL AUTO_INCREMENT,
-  `elder` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '老人姓名',
-  `record_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '记录类型 (如: 血压, 体温)',
-  `value` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '测量值 (如: 120/80 mmHg)',
+  `elder_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `record_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `value` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `record_date` date NOT NULL COMMENT '记录日期',
-  `record_care_worker` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '记录护工',
-  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '备注',
+  `careworker_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '记录护工',
+  `notes` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
   `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `elder_id`(`elder` ASC) USING BTREE
+  INDEX `elder_id`(`elder_name` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 33 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -372,7 +372,7 @@ INSERT INTO `health_records` VALUES (20, '蒋秀兰', '血压', '120/80 mmHg', '
 INSERT INTO `health_records` VALUES (21, '沈建国', '体温', '36.8 °C', '2025-05-11', '蔡丽', NULL, '2025-06-23 20:50:46', '2025-06-28 10:29:57');
 INSERT INTO `health_records` VALUES (22, '韩秀兰', '血糖', '5.5 mmol/L', '2025-05-08', '秦芳', NULL, '2025-06-23 20:50:46', '2025-06-28 10:29:57');
 INSERT INTO `health_records` VALUES (23, '程建国', '心率', '75 bpm', '2025-02-17', '董芳', NULL, '2025-06-23 20:50:46', '2025-06-28 10:29:57');
-INSERT INTO `health_records` VALUES (24, '董秀英', '体重', '65 kg', '2025-06-18', '周敏', NULL, '2025-06-23 20:50:46', '2025-06-28 10:29:57');
+INSERT INTO `health_records` VALUES (24, '董秀英', '体重', '65 kg', '2025-06-18', '周敏', NULL, '2025-06-23 20:50:46', '2025-06-28 22:59:01');
 INSERT INTO `health_records` VALUES (25, '梁建国', '血压', '120/80 mmHg', '2025-04-29', '梁强', NULL, '2025-06-23 20:50:46', '2025-06-28 10:29:57');
 INSERT INTO `health_records` VALUES (26, '蔡秀兰', '体温', '36.8 °C', '2025-03-21', '潘芳', NULL, '2025-06-23 20:50:46', '2025-06-28 10:29:57');
 INSERT INTO `health_records` VALUES (27, '潘建国', '血糖', '5.5 mmol/L', '2025-05-18', '蔡丽', NULL, '2025-06-23 20:50:46', '2025-06-28 10:29:57');
@@ -385,7 +385,7 @@ INSERT INTO `health_records` VALUES (30, '朱明远', '血压', '120/80 mmHg', '
 -- ----------------------------
 DROP TABLE IF EXISTS `system_settings`;
 CREATE TABLE `system_settings`  (
-  `setting_key` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '设置键',
+  `setting_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `setting_value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '设置值',
   PRIMARY KEY (`setting_key`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
@@ -394,8 +394,12 @@ CREATE TABLE `system_settings`  (
 -- Records of system_settings
 -- ----------------------------
 INSERT INTO `system_settings` VALUES ('bedWarningThreshold', '80');
+INSERT INTO `system_settings` VALUES ('copyright', '© 2025 Yusheng Tech');
 INSERT INTO `system_settings` VALUES ('favicon', 'data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4d/9AOHf/QDh3/0AOHf/QDh3/0AOHf/QDh3/0AOHf/QDh3/0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4d/9AOHf/wDh3/8A4d//AOHf/wDh3/8A4d//AOHf/wDh3/8A4d/9AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOHf/QDh3/8A4d//AOHf/QDh3/0A4d/9AOHf/QDh3/8A4d/9AAAAAOHf/QDh3/0AAAAAAAAAAAAAAAAAAAAAAAAAAOHf/QDh3/8A4d//AOHf/wDh3/8A4d//AOHf/wDh3/0A4d/9AAAAAOHf/QDh3/0A4d/9AAAAAAAAAAAAAAAAAAAAAOHf/QDh3/8A4d//AOHf/wDh3/8A4d/9AOHf/QDh3/8A4d/9AAAAAOHf/QDh3/8A4d//AOHf/QAAAAAAAAAAAAAAAOHf/QDh3/8A4d//AOHf/wDh3/8A4d/9AOHf/QDh3/8A4d/9AAAAAOHf/wDh3/8A4d//AOHf/wDh3/0AAAAAAAAAAOHf/QDh3/8A4d//AOHf/wDh3/8A4d/9AOHf/QDh3/0A4d/9AOHf/QDh3/8A4d//AOHf/wDh3//AOHf/QAAAAAChwP0AocD9AKHA/QChwP0AocD9AKHA/QChwP0AocD9AKHA/QChwP0AocD9AKHA/QChwP0AocD9AKHA/QAAAAA4d/9AOHf/QDh3/0AOHf/QDh3/0AOHf/QDh3/0AOHf/QDh3/0AOHf/QDh3/0AOHf/QDh3/9AOHf/QDh3/0AAAAAAAAAAOHf/QDh3/0AOHf/QDh3/0AOHf/QDh3/0AOHf/QDh3/0A4d/9AOHf/wDh3//AOHf/wDh3//AOHf/QAAAAAAAAAA4d/9AOHf/QDh3/0AOHf/QDh3/0AOHf/QDh3/9AOHf/wDh3/8A4d//AOHf/wDh3//AOHf/wDh3/0AAAAAAAAAAAAAAADh3/0A4d/9AOHf/QDh3/0A4d/9AOHf/wDh3/8A4d//AOHf/wDh3//AOHf/wDh3//AOHf/QAAAAAAAAAAAAAAAAAAAAA4d/9AOHf/QDh3/8A4d/9AOHf/QDh3/0A4d/9AOHf/wDh3//AOHf/wDh3//AOHf/QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADh3/0A4d/9AOHf/QDh3/0AOHf/QDh3/0AOHf/wDh3//AOHf/QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4d/9AOHf/QDh3/0A4d/9AOHf/QDh3/0AOHf/QAAAAAAAAAAAAAAAA/D8AAPAHAADgBwAA4AcAAMADAADgAwAA4AEAAPABAAD4AQAA+AEAAOABAADAAQAAwAMAAMADAADgBwAA8B8AAA==');
+INSERT INTO `system_settings` VALUES ('isInitialized', 'true');
+INSERT INTO `system_settings` VALUES ('logo', '');
 INSERT INTO `system_settings` VALUES ('sessionTimeout', '30');
 INSERT INTO `system_settings` VALUES ('systemName', '智慧养老院管理系统');
+INSERT INTO `system_settings` VALUES ('theme', 'light');
 
 SET FOREIGN_KEY_CHECKS = 1;
