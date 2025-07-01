@@ -1,0 +1,60 @@
+package com.yusheng.service.impl;
+
+import com.yusheng.mapper.ElderMapper;
+import com.yusheng.pojo.Elder;
+import com.yusheng.service.ElderService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class ElderServiceImpl implements ElderService {
+
+    @Autowired
+    public ElderMapper elderMapper;
+
+//    查询全部老人数据
+@Override
+public List<Elder> findElders(Integer id, String name) {
+    return elderMapper.findElders(id, name);
+}
+
+
+    //    删除老人
+    @Override
+    public void deleteById(Integer id) {
+        elderMapper.deleteById(id);
+    }
+
+//    新增老人
+
+    @Override
+    public void save(Elder elder) {
+        LocalDateTime now = LocalDateTime.now(); // 获取当前服务器时间
+
+        // 为新增操作设置所有关键时间
+        elder.setCheckInDate(now); // ✅ 设置入院时间
+        elder.setCreatedAt(now);   // ✅ 设置创建时间
+        elder.setUpdatedAt(now);   // ✅ 设置更新时间
+
+        elderMapper.save(elder);
+    }
+
+//    根据ID查询老人信息
+    @Override
+    public Elder getInfo(Integer id) {
+        return elderMapper.getById(id);
+    }
+
+//    修改老人
+    @Override
+    public void update(Elder elder) {
+        elder.setUpdatedAt(LocalDateTime.now());
+        elderMapper.updateById(elder);
+    }
+
+    @Override
+    public List<Elder> findUnassigned() {return elderMapper.findUnassigned();}
+}
