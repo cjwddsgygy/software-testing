@@ -1,0 +1,5 @@
+使用教程
+数据库：使用docker挂载mysql8，使用Navicat（16）打开，链接到idea
+后端：idea2023.2.7
+项目：JDK17、nodejs22（idea自带）
+前端：在前端目录打开cmd，输入npm run dev启动

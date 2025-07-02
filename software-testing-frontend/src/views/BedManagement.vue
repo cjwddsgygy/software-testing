@@ -123,6 +123,8 @@
   </div>
 </template>
 
+
+
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue';
 import { ElMessage } from 'element-plus';
@@ -263,13 +265,33 @@ const handleEditFromDetail = (bed) => {
 };
 
 const confirmCheckout = (bed) => {
-  confirmModal.title = '确认办理退住';
-  confirmModal.message = `您要为床位 <strong>${bed.bedNumber}</strong> 上的老人办理退住吗？`;
-  confirmModal.note = '此操作会将床位状态设置为空闲，并清空入住人信息。';
-  confirmModal.confirmButtonClass = 'btn btn-info';
+confirmModal.title = '确认办理退住';
+confirmModal.message = `您要为床位 <strong>${bed.bedNumber}</strong> 上的老人办理退住吗？`;
+confirmModal.note = '此操作会将床位状态设置为空闲，并清空入住人信息。';
+confirmModal.confirmButtonClass = 'btn btn-info';
+confirmModal.onConfirm = async () => {
+try {
+await apiClient.put(`/api/beds/${bed.id}/checkout`);
+ElMessage.success(`床位 ${bed.bedNumber} 办理退住成功！`);
+closeConfirmModal();
+await fetchBeds();
+} catch (error) {
+ElMessage.error(error.response?.data?.msg || '办理退住失败，请重试');
+}
+};
+isConfirmModalVisible.value = true;
+};
+
+const confirmDeleteBed = (bed) => {
+  confirmModal.title = '确认删除床位';
+  confirmModal.message = `您确定要删除床位 <strong>${bed.bedNumber}</strong> 吗？`;
+  confirmModal.note = '此操作将永久删除该床位信息，且无法恢复。';
+  confirmModal.confirmButtonClass = 'btn btn-danger';
   confirmModal.onConfirm = async () => {
     try {
-      await apiClient.put(`/api/beds/${bed.id}/checkout`, { status: '空闲' });
+      // ✅✅✅ 核心修改：不再传递第二个参数（请求体）✅✅✅
+      await apiClient.put(`/api/beds/${bed.id}/checkout`); 
+      
       ElMessage.success(`床位 ${bed.bedNumber} 办理退住成功！`);
       closeConfirmModal();
       await fetchBeds();
@@ -280,46 +302,21 @@ const confirmCheckout = (bed) => {
   isConfirmModalVisible.value = true;
 };
 
-const confirmDeleteBed = (bed) => {
-  confirmModal.title = '确认删除床位';
-  confirmModal.message = `您确定要删除床位 <strong>${bed.bedNumber}</strong> 吗？`;
-  confirmModal.note = '此操作将永久删除该床位信息，且无法恢复。';
-  confirmModal.confirmButtonClass = 'btn btn-danger';
-  confirmModal.onConfirm = async () => {
-    try {
-      await apiClient.delete(`/api/beds/${bed.id}`);
-      ElMessage.success('床位删除成功！');
-      closeConfirmModal();
-      await fetchBeds();
-    } catch (error) {
-      ElMessage.error(error.response?.data?.msg || '删除失败，请重试');
-    }
-  };
-  isConfirmModalVisible.value = true;
-};
-
 onMounted(fetchBeds);
 </script>
 
+
+
 <style scoped>
-/* 视图标题和通用容器 */
+/* --- 视图标题和通用容器 --- */
 .bed-management-view {
   padding: 20px;
   font-family: 'Arial', sans-serif;
-  background-color: #f8f9fa;
+  background-color: var(--bg-page, #f8f9fa);
   min-height: calc(100vh - 60px);
 }
 
-.view-title {
-  font-size: 28px;
-  color: #333;
-  margin-bottom: 25px;
-  text-align: center;
-  font-weight: 600;
-  letter-spacing: -0.5px;
-}
-
-/* 工具栏 */
+/* --- 工具栏 --- */
 .toolbar {
   display: flex;
   gap: 15px;
@@ -329,21 +326,22 @@ onMounted(fetchBeds);
 
 .search-input {
   padding: 10px 15px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color, #ccc);
   border-radius: 6px;
   flex-grow: 1;
   max-width: 400px;
   font-size: 16px;
   transition: border-color 0.3s, box-shadow 0.3s;
+  background-color: var(--bg-input, #fff);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #409eff;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+  border-color: var(--primary-color, #409eff);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb, 64, 158, 255), 0.2);
 }
 
-/* 按钮样式 */
+/* --- 按钮样式 --- */
 .btn {
   padding: 10px 20px;
   border: none;
@@ -364,43 +362,38 @@ onMounted(fetchBeds);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.btn-primary { background-color: #409eff; }
-.btn-primary:hover { background-color: #66b1ff; }
-.btn-success { background-color: #67c23a; }
-.btn-success:hover { background-color: #85ce61; }
-.btn-secondary { background-color: #909399; }
-.btn-secondary:hover { background-color: #a6a9ad; }
-.btn-info { background-color: #17a2b8; }
-.btn-info:hover { background-color: #138496; }
-.btn-danger { background-color: #f56c6c; }
-.btn-danger:hover { background-color: #f78989; }
+.btn-primary { background-color: var(--primary-color, #409eff); }
+.btn-success { background-color: var(--success-color, #67c23a); }
+.btn-secondary { background-color: var(--secondary-color, #909399); }
+.btn-info { background-color: var(--info-color, #17a2b8); }
+.btn-danger { background-color: var(--danger-color, #f56c6c); }
 
-/* 列表加载和空状态文本 */
+/* --- 列表加载和空状态文本 --- */
 .loading-text, .empty-text {
   font-size: 18px;
-  color: #888;
+  color: var(--text-secondary, #888);
   text-align: center;
   padding: 60px;
-  background: #fff;
+  background: var(--bg-card, #fff);
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
-/* 床位网格布局 */
+/* --- 床位网格布局 --- */
 .bed-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 25px;
   padding: 20px;
-  background: #fff;
+  background: var(--bg-card, #fff);
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
-/* 床位卡片 */
+/* --- 床位卡片 --- */
 .bed-card {
-  background: #fff;
-  border: 1px solid #eef1f6;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border-color-light, #eef1f6);
   border-radius: 10px;
   padding: 20px;
   text-align: center;
@@ -417,7 +410,7 @@ onMounted(fetchBeds);
 .bed-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-  border-color: #409eff;
+  border-color: var(--primary-color, #409eff);
 }
 
 .bed-card .bed-number {
@@ -434,22 +427,18 @@ onMounted(fetchBeds);
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.bed-card:hover .bed-number {
-  transform: scale(1.05);
-}
-
-.bed-card .status-occupied { background-color: #f56c6c; /* 占用 - 红色 */ }
-.bed-card .status-vacant { background-color: #67c23a; /* 空闲 - 绿色 */ }
-.bed-card:hover .status-occupied { background-color: #f78989; }
-.bed-card:hover .status-vacant { background-color: #85ce61; }
+.bed-card .status-occupied { background-color: var(--status-danger, #f56c6c); }
+.bed-card .status-vacant { background-color: var(--status-success, #67c23a); }
+.bed-card:hover .status-occupied { background-color: var(--status-danger-light, #f78989); }
+.bed-card:hover .status-vacant { background-color: var(--status-success-light, #85ce61); }
 
 .elder-name {
   font-size: 18px;
-  color: #555;
+  color: var(--text-primary, #555);
   font-weight: 500;
 }
 
-/* 模态框通用样式 */
+/* --- 模态框通用样式 --- */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -466,10 +455,10 @@ onMounted(fetchBeds);
 }
 
 .modal-content {
-  background: #fff;
+  background: var(--bg-card, #fff);
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  width: 500px; /* 调整弹窗宽度 */
+  width: 500px;
   max-width: 90%;
   overflow: hidden;
   animation: slideIn 0.3s ease-out;
@@ -479,16 +468,16 @@ onMounted(fetchBeds);
 
 .modal-header {
   padding: 18px 24px;
-  border-bottom: 1px solid #f0f2f5;
+  border-bottom: 1px solid var(--border-color-light);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #fafafa;
+  background-color: var(--bg-header);
 }
 
 .modal-title {
   font-size: 20px;
-  color: #333;
+  color: var(--text-primary, #333);
   margin: 0;
   font-weight: 600;
 }
@@ -497,20 +486,21 @@ onMounted(fetchBeds);
   background: none;
   border: none;
   font-size: 24px;
-  color: #909399;
+  color: var(--text-secondary, #909399);
   cursor: pointer;
   transition: color 0.3s;
   padding: 0 5px;
 }
 
 .close-btn:hover {
-  color: #606266;
+  color: var(--text-regular, #606266);
 }
 
 .form-content {
   padding: 24px;
   max-height: 70vh;
   overflow-y: auto;
+  background-color: var(--bg-card, #fff);
 }
 
 .form-grid {
@@ -520,15 +510,11 @@ onMounted(fetchBeds);
   margin-bottom: 20px;
 }
 
-.form-item {
-  margin-bottom: 0;
-}
-
 .form-item label {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #606266;
+  color: var(--text-regular, #606266);
   font-size: 15px;
 }
 
@@ -537,39 +523,42 @@ onMounted(fetchBeds);
 .form-item textarea {
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--border-color, #dcdfe6);
   border-radius: 4px;
   box-sizing: border-box;
   font-size: 15px;
   transition: border-color 0.3s, box-shadow 0.3s;
+  background-color: var(--bg-input, #fff);
 }
 
 .form-item input:focus,
 .form-item select:focus,
 .form-item textarea:focus {
   outline: none;
-  border-color: #409eff;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+  border-color: var(--primary-color, #409eff);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb, 64, 158, 255), 0.2);
 }
 
 .modal-footer {
   padding: 15px 24px;
-  border-top: 1px solid #f0f2f5;
+  border-top: 1px solid var(--border-color-light);
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  background-color: #fafafa;
+  background-color: var(--bg-header);
 }
 
-/* 详情模态框特有样式 */
+/* --- 详情模态框特有样式 --- */
 .detail-modal {
-  width: 600px; /* 调整详情弹窗宽度 */
+  width: 600px;
+  background: var(--bg-card, #fff);
 }
 
 .detail-content {
   padding: 24px;
   max-height: 70vh;
   overflow-y: auto;
+  background-color: var(--bg-card, #fff);
 }
 
 .detail-grid {
@@ -582,21 +571,21 @@ onMounted(fetchBeds);
 .detail-item {
   display: flex;
   align-items: flex-start;
-  border-bottom: 1px solid #f0f2f5;
+  border-bottom: 1px solid var(--border-color-light, #f0f2f5);
   padding-bottom: 10px;
   font-size: 16px;
   line-height: 1.5;
 }
 
 .detail-item strong {
-  color: #555;
+  color: var(--text-regular, #555);
   min-width: 100px;
   font-weight: 500;
   margin-right: 10px;
 }
 
 .detail-item span {
-  color: #333;
+  color: var(--text-primary, #333);
   word-break: break-all;
   flex: 1;
 }
@@ -605,7 +594,7 @@ onMounted(fetchBeds);
   grid-column: 1 / -1;
 }
 
-/* 自定义确认对话框样式 */
+/* --- 自定义确认对话框样式 --- */
 .custom-modal-overlay {
   position: fixed;
   top: 0;
@@ -621,7 +610,7 @@ onMounted(fetchBeds);
 }
 
 .custom-modal-content {
-  background: white;
+  background: var(--bg-card, #fff);
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   width: 380px;
@@ -632,16 +621,29 @@ onMounted(fetchBeds);
   overflow: hidden;
 }
 
-/* 新增/编辑表单中必须填写部分的样式 */
+/* 确认对话框头部和底部 */
+.custom-modal-content .modal-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border-color-light);
+  background-color: var(--bg-header);
+}
+
+.custom-modal-content .modal-footer {
+  padding: 15px 24px;
+  border-top: 1px solid var(--border-color-light);
+  background-color: var(--bg-header);
+}
+
+/* --- 新增/编辑表单中必须填写部分的样式 --- */
 .required-section {
-  background-color: #fafafa;
+  background-color: var(--bg-page, #fafafa);
   padding: 15px;
   border-radius: 6px;
-  border: 1px solid #eee;
+  border: 1px solid var(--border-color-light, #eee);
   margin-bottom: 20px;
 }
 
-/* 动画 */
+/* --- 动画 --- */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }

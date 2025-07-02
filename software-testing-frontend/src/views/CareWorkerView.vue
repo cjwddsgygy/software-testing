@@ -58,6 +58,18 @@
         </table>
         <div v-if="loading" class="loading-placeholder"><div class="loading-spinner"></div><p>正在加载...</p></div>
         <div v-if="!loading && careWorkers.length === 0" class="empty-content"><i class="fas fa-user-md"></i><p>暂无护工信息</p></div>
+             <div class="pagination-container" v-if="searchParams.total > 0">
+        <el-pagination
+          background
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="searchParams.total"
+          v-model:current-page="searchParams.page"
+          v-model:page-size="searchParams.pageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
       </div>
     </div>
 
@@ -156,11 +168,19 @@
 <script setup>
 import { ref, reactive, onMounted, watch } from 'vue';
 import apiClient from '@/api/request';
+import { ElMessage } from 'element-plus'; 
 
 // --- 响应式状态 ---
 const careWorkers = ref([]);
 const loading = ref(true);
-const searchParams = reactive({ searchTerm: '' });
+
+const searchParams = reactive({
+  searchTerm: '',
+  page: 1,       // 当前页码，默认为第1页
+  pageSize: 10,  // 每页显示条数，默认为10条
+  total: 0       // 总记录数，初始为0，由后端返回
+});
+
 const isModalVisible = ref(false);
 const currentCareWorker = ref({});
 const isEditing = ref(false);
@@ -173,12 +193,32 @@ const deletingCareWorkerId = ref(null);
 const fetchCareWorkers = async () => {
   loading.value = true;
   try {
-    const response = await apiClient.get('/api/careWorkers', { params: { searchTerm: searchParams.searchTerm } });
-    if (response.data.code === 0) {
-      careWorkers.value = response.data.data || [];
+    // ✅ 在 params 中加入了分页参数 page 和 pageSize
+    const response = await apiClient.get('/api/careWorkers', { 
+      params: { 
+        searchTerm: searchParams.searchTerm,
+        page: searchParams.page,
+        pageSize: searchParams.pageSize
+      } 
+    });
+    
+    // ✅ 确保后端返回的数据结构是 { code: 0, data: { list: [...], total: ... } }
+    if (response.data.code === 0 && response.data.data) {
+      // ✅ 将返回的数据列表赋值给 careWorkers
+      careWorkers.value = response.data.data.list || [];
+      // ✅ 将返回的总记录数赋值给 searchParams.total，用于驱动分页器
+      searchParams.total = response.data.data.total || 0;
+    } else {
+      // 如果请求成功但业务码不为0，或data为空，清空现有数据
+      careWorkers.value = [];
+      searchParams.total = 0;
+      console.error('获取护工信息失败:', response.data.msg || '服务器返回数据格式不正确');
     }
   } catch (error) {
+    // 如果请求直接失败（如网络错误，40x, 50x），也清空数据
     console.error('获取护工信息失败:', error);
+    careWorkers.value = [];
+    searchParams.total = 0;
   } finally {
     loading.value = false;
   }
@@ -223,7 +263,7 @@ const openModal = (worker = null) => {
   if (worker) {
     isEditing.value = true;
     
-    // ✅✅✅ 核心修复：将 status 转换为字符串类型 ✅✅✅
+
     // 复制 worker 对象，并确保 status 字段是字符串，以匹配 <select> 的 <option> value
     currentCareWorker.value = { 
       ...worker, 
@@ -234,10 +274,14 @@ const openModal = (worker = null) => {
   } else {
     isEditing.value = false;
     // 新增时，默认为 '1' (在职)，已经是字符串，无需修改
-    currentCareWorker.value = { status: '1' }; 
+    currentCareWorker.value = {
+      status: '1' ,
+      birthDate: formatDate(new Date())
+    }; 
   }
   isModalVisible.value = true;
 };
+
 const closeModal = () => { isModalVisible.value = false; currentCareWorker.value = {}; };
 const openDetailModal = (worker) => { detailCareWorker.value = worker; isDetailModalVisible.value = true; };
 const closeDetailModal = () => { isDetailModalVisible.value = false; detailCareWorker.value = null; };
@@ -264,9 +308,32 @@ const getStatusClass = (status) => {
   }
 };
 
+// ✅✅✅ 处理分页器事件的方法 ✅✅✅
+
+/**
+ * 当每页显示条数改变时触发 (e.g., from 10 to 20)
+ */
+const handleSizeChange = (newPageSize) => {
+  searchParams.pageSize = newPageSize;
+  searchParams.page = 1; // 改变每页条数时，通常回到第一页
+  fetchCareWorkers();
+};
+
+/**
+ * 当页码改变时触发 (e.g., from page 1 to 2)
+ */
+const handleCurrentChange = (newPage) => {
+  searchParams.page = newPage;
+  fetchCareWorkers();
+};
+
 // --- 生命周期钩子 ---
 onMounted(fetchCareWorkers);
-watch(() => searchParams.searchTerm, fetchCareWorkers);
+watch(() => searchParams.searchTerm, () => {
+  searchParams.page = 1;
+  fetchCareWorkers();
+});
+watch(() => searchParams.page, fetchCareWorkers);
 </script>
 
 <style scoped>
@@ -672,6 +739,12 @@ watch(() => searchParams.searchTerm, fetchCareWorkers);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 15px;
+}
+
+.pagination-container {
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
 }
 
 /* --- 动画 --- */

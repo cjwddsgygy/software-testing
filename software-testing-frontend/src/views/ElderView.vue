@@ -58,6 +58,18 @@
         </table>
         <div v-if="loading" class="loading-placeholder"><div class="loading-spinner"></div><p>正在加载...</p></div>
         <div v-if="!loading && elders.length === 0" class="empty-content"><i class="fas fa-users"></i><p>暂无老人信息</p></div>
+             <div class="pagination-container" v-if="searchParams.total > 0">
+        <el-pagination
+          background
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="searchParams.total"
+          v-model:current-page="searchParams.page"
+          v-model:page-size="searchParams.pageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
       </div>
     </div>
 
@@ -158,11 +170,19 @@
 <script setup>
 import { ref, reactive, onMounted, watch } from 'vue';
 import apiClient from '@/api/request';
+import { ElMessage } from 'element-plus'; 
 
 // --- 响应式状态 ---
 const elders = ref([]);
 const loading = ref(true);
-const searchParams = reactive({ searchTerm: '' });
+
+const searchParams = reactive({
+  searchTerm: '',
+  page: 1,       // 当前页码，默认为第1页
+  pageSize: 10,  // 每页显示条数，默认为10条
+  total: 0       // 总记录数，初始为0，由后端返回
+});
+
 const isModalVisible = ref(false);
 const currentElder = ref({});
 const isEditing = ref(false);
@@ -172,15 +192,33 @@ const isDeleteDialogVisible = ref(false);
 const deletingElderId = ref(null);
 
 // --- API 调用 ---
+// ElderView.vue -> <script setup>
+
 const fetchElders = async () => {
   loading.value = true;
   try {
-    const response = await apiClient.get('/api/elders', { params: { searchTerm: searchParams.searchTerm } });
-    if (response.data.code === 0) {
-      elders.value = response.data.data || [];
+    // ✅ 在 params 中加入所有需要的参数
+    const response = await apiClient.get('/api/elders', { 
+      params: { 
+        searchTerm: searchParams.searchTerm,
+        page: searchParams.page,
+        pageSize: searchParams.pageSize
+      } 
+    });
+    
+    if (response.data.code === 0 && response.data.data) {
+      // ✅ 后端返回的数据结构是 { list: [...], total: ... }
+      elders.value = response.data.data.list || [];
+      searchParams.total = response.data.data.total || 0;
+    } else {
+      // 清空数据，以防显示旧内容
+      elders.value = [];
+      searchParams.total = 0;
     }
   } catch (error) {
     console.error('获取老人信息失败:', error);
+    elders.value = [];
+    searchParams.total = 0;
   } finally {
     loading.value = false;
   }
@@ -228,7 +266,7 @@ const openModal = (elder = null) => {
   } else {
     isEditing.value = false;
     currentElder.value = {
-      name: '', age: null, birthDate: '', ethnicity: '', account: '', password: '',
+      name: '', age: null, birthDate: formatDate(new Date()), ethnicity: '', account: '', password: '',
       education: '', maritalStatus: '', hobbies: '', medicalCare: '',
       feeType: '月结', expenses: null, bedNumber: '', careLevel: '', relativeContact: ''
     };
@@ -252,9 +290,32 @@ const getCareLevelClass = (level) => {
   return 'info';
 };
 
+// ✅✅✅ 处理分页器事件的方法 ✅✅✅
+
+/**
+ * 当每页显示条数改变时触发 (e.g., from 10 to 20)
+ */
+const handleSizeChange = (newPageSize) => {
+  searchParams.pageSize = newPageSize;
+  searchParams.page = 1; // 改变每页条数时，通常回到第一页
+  fetchElders();
+};
+
+/**
+ * 当页码改变时触发 (e.g., from page 1 to 2)
+ */
+const handleCurrentChange = (newPage) => {
+  searchParams.page = newPage;
+  fetchElders();
+};
+
 // --- 生命周期钩子 ---
 onMounted(fetchElders);
-watch(() => searchParams.searchTerm, fetchElders);
+watch(() => searchParams.searchTerm, () => {
+  searchParams.page = 1;
+  fetchElders();
+});
+watch(() => searchParams.page, fetchElders);
 </script>
 
 <style scoped>
@@ -660,6 +721,12 @@ watch(() => searchParams.searchTerm, fetchElders);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 15px;
+}
+
+.pagination-container {
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
 }
 
 /* --- 动画 --- */

@@ -7,13 +7,11 @@ export const useSettingsStore = defineStore('settings', {
   state: () => ({
     // isInitialized 反映当前会话状态，初始值永远是 false，且不应被持久化
     isInitialized: false, 
-    
-    // 这些是需要持久化的默认值，当后端请求失败时会使用
     systemName: '养老院信息管理系统', 
     theme: 'light',
     copyright: '© 2025',
     logo: '',
-    favicon: '',
+    favicon: '', // ✅ state 中必须有这个字段来存储 favicon 的 URL
     sessionTimeout: 30,
   }),
 
@@ -75,28 +73,47 @@ export const useSettingsStore = defineStore('settings', {
      * ✅ 3. 将视觉设置应用到 DOM
      */
     applyDisplaySettings() {
-      document.title = this.systemName;
+      // 1. 更新页面标题
+      if (this.systemName) {
+        document.title = this.systemName;
+      }
+
+      // 2. 更新主题
       const root = document.documentElement;
       if (this.theme === 'dark') {
         root.setAttribute('data-theme', 'dark');
       } else {
         root.removeAttribute('data-theme');
       }
-       // 3. ✅ 动态更新 Favicon
-      // 查找 head 中现有的 favicon link 标签
+
+      // 3. ✅ 动态更新浏览器标签页图标 (Favicon)
+      
+      // 首先，尝试找到页面 <head> 中已存在的 favicon 链接
       let faviconLink = document.querySelector("link[rel~='icon']");
       
-      // 如果不存在，就创建一个新的 link 标签
+      // 如果页面上没有 <link rel="icon"> 标签，就创建一个新的
       if (!faviconLink) {
         faviconLink = document.createElement('link');
         faviconLink.rel = 'icon';
+        // 将新创建的 link 标签添加到 <head> 的末尾
         document.head.appendChild(faviconLink);
       }
       
-      // 如果 store 中有 favicon 的 URL，就更新 href，否则使用默认的
-      faviconLink.href = this.favicon || '/favicon.ico'; // 假设你的 public 目录下有一个默认的 favicon.ico
+      // 现在，更新这个 link 标签的 href 属性
+      if (this.favicon && this.favicon.trim() !== '') {
+        // 如果 store 中存储了有效的 favicon URL，就使用它
+        // 关键：确保 URL 是完整的，如果后端返回的是相对路径，需要拼接
+        // 假设 apiClient.defaults.baseURL 是 'http://localhost:8080'
+        // 并且后端返回的 this.favicon 是 '/uploads/xxx.png'
+        const baseURL = apiClient.defaults.baseURL || window.location.origin;
+        // 如果 this.favicon 已经是完整的 http 地址，则无需拼接
+        faviconLink.href = this.favicon.startsWith('http') ? this.favicon : `${baseURL}${this.favicon}`;
+      } else {
+        // 如果没有，就使用 public 目录下的默认 favicon.ico
+        // Vite 会自动处理 /favicon.ico 路径
+        faviconLink.href = '/favicon.ico'; 
+      }
     },
-
 
    
     /**

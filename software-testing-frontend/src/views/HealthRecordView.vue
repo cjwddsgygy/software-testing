@@ -40,6 +40,8 @@
               <th>测量值</th>
               <th>记录日期</th>
               <th>记录护工</th>
+              <th class="notes-cell">健康描述</th>
+              <th class="notes-cell">医生建议</th>
               <th class="notes-cell">备注</th>
               <th>操作</th>
             </tr>
@@ -52,6 +54,8 @@
               <td class="font-medium">{{ record.value }}</td>
               <td>{{ formatDate(record.recordDate) }}</td>
               <td>{{ record.careworkerName }}</td>
+              <td class="notes-cell" :title="record.description">{{ record.description || '无' }}</td>
+              <td class="notes-cell" :title="record.doctorNotes">{{ record.doctorNotes || '无' }}</td>
               <td class="notes-cell" :title="record.notes">{{ record.notes || '无' }}</td>
               <td class="actions-cell">
                 <button @click="openDetailModal(record)" class="action-btn" title="查看详情"><i class="fas fa-eye"></i></button>
@@ -63,6 +67,18 @@
         </table>
         <div v-if="loading" class="loading-placeholder"><div class="loading-spinner"></div><p>正在加载...</p></div>
         <div v-if="!loading && healthRecords.length === 0" class="empty-content"><i class="fas fa-inbox"></i><p>暂无健康记录</p></div>
+              <div class="pagination-container" v-if="searchParams.total > 0">
+        <el-pagination
+          background
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="searchParams.total"
+          v-model:current-page="searchParams.page"
+          v-model:page-size="searchParams.pageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
       </div>
     </div>
 
@@ -114,6 +130,18 @@
                   <label for="careworkerName">记录护工</label>
                   <div class="input-wrapper"><i class="fas fa-user-md"></i><input id="careworkerName" v-model="currentRecord.careworkerName" type="text" placeholder="请输入记录护工姓名"/></div>
                 </div>
+                <div class="form-field">
+                  <label for="elder">关联老人</label>
+                  <input id="elder" v-model="currentRecord.elder">
+                </div>
+                <div class="form-field full-span">
+                  <label for="description">健康描述</label>
+                  <textarea id="description" v-model="currentRecord.description" rows="3"></textarea>
+                </div>
+                <div class="form-field full-span">
+                  <label for="doctorNotes">医生建议</label>
+                  <textarea id="doctorNotes" v-model="currentRecord.doctorNotes" rows="3"></textarea>
+                </div>
                 <div class="form-field full-span">
                   <label for="notes">备注</label>
                   <div class="input-wrapper"><i class="fas fa-pen"></i><textarea id="notes" v-model="currentRecord.notes" rows="3" placeholder="请输入备注信息"></textarea></div>
@@ -147,6 +175,9 @@
             <div class="detail-item"><div class="item-label"><i class="fas fa-ruler-combined"></i> 测量值</div><div class="item-value font-medium">{{ detailRecord.value }}</div></div>
             <div class="detail-item"><div class="item-label"><i class="fas fa-calendar-alt"></i> 记录日期</div><div class="item-value">{{ formatDate(detailRecord.recordDate) }}</div></div>
             <div class="detail-item"><div class="item-label"><i class="fas fa-user-md"></i> 记录护工</div><div class="item-value">{{ detailRecord.careworkerName || '未记录' }}</div></div>
+            <div class="detail-item full-span"><div class="item-label"><i class="fas fa-file-medical-alt"></i> 健康描述</div><div class="item-value note-value">{{ detailRecord.description || '无' }}</div></div>
+            <div class="detail-item full-span"><div class="item-label"><i class="fas fa-stethoscope"></i> 医生建议</div><div class="item-value note-value">{{ detailRecord.doctorNotes || '无' }}</div></div>
+            <div class="detail-item full-span"><div class="item-label"><i class="fas fa-link"></i> 关联老人</div><div class="item-value">{{ detailRecord.elder || '无' }}</div></div>
             <div class="detail-item full-span"><div class="item-label"><i class="fas fa-pen"></i> 备注</div><div class="item-value note-value">{{ detailRecord.notes || '无' }}</div></div>
             <div class="detail-item"><div class="item-label"><i class="fas fa-clock"></i> 创建时间</div><div class="item-value">{{ formatDateTime(detailRecord.createdAt) }}</div></div>
             <div class="detail-item"><div class="item-label"><i class="fas fa-history"></i> 最后更新</div><div class="item-value">{{ formatDateTime(detailRecord.updatedAt) }}</div></div>
@@ -191,7 +222,8 @@
 
 <script setup>
 import { ref, reactive, onMounted, watch } from 'vue';
-import apiClient from '@/api/request'; // 假设你的api客户端在这里
+import apiClient from '@/api/request'; // api客户端
+import { ElMessage } from 'element-plus';
 
 // --- 响应式状态 ---
 const healthRecords = ref([]);
@@ -304,12 +336,15 @@ const openModal = (record = null) => {
   } else {
     isEditing.value = false;
     currentRecord.value = {
+      careworkerName: '',
       elderName: '',
+      notes: '',
+      recordDate: formatDate(new Date()),
       recordType: '',
       value: '',
-      recordDate: formatDate(new Date()),
-      careworkerName: '',
-      notes: ''
+      description: '', 
+      doctorNotes: '', 
+      elder: ''        
     };
   }
   isModalVisible.value = true;
@@ -350,6 +385,25 @@ const showNotification = (type, message) => {
   }, 3000);
 };
 const closeNotification = () => { notification.value.show = false; };
+
+// ✅✅✅ 处理分页器事件的方法 ✅✅✅
+
+/**
+ * 当每页显示条数改变时触发 (e.g., from 10 to 20)
+ */
+const handleSizeChange = (newPageSize) => {
+  searchParams.pageSize = newPageSize;
+  searchParams.page = 1; // 改变每页条数时，通常回到第一页
+  fetchHealthRecords();
+};
+
+/**
+ * 当页码改变时触发 (e.g., from page 1 to 2)
+ */
+const handleCurrentChange = (newPage) => {
+  searchParams.page = newPage;
+  fetchHealthRecords();
+};
 
 // --- 生命周期与监听 ---
 onMounted(fetchHealthRecords);
@@ -763,6 +817,12 @@ watch(() => searchParams.page, fetchHealthRecords);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 15px;
+}
+
+.pagination-container {
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
 }
 
 /* --- 动画 --- */

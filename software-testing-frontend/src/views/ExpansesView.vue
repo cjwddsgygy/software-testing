@@ -57,6 +57,18 @@
         </table>
         <div v-if="loading" class="loading-placeholder"><div class="loading-spinner"></div><p>正在加载...</p></div>
         <div v-if="!loading && expenses.length === 0" class="empty-content"><i class="fas fa-inbox"></i><p>暂无消费记录</p></div>
+              <div class="pagination-container" v-if="searchParams.total > 0">
+        <el-pagination
+          background
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="searchParams.total"
+          v-model:current-page="searchParams.page"
+          v-model:page-size="searchParams.pageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </div>
       </div>
     </div>
 
@@ -157,6 +169,7 @@
 // Script 部分无需修改，保持原样即可
 import { ref, reactive, onMounted, watch } from 'vue';
 import apiClient from '@/api/request';
+import { ElMessage } from 'element-plus'; 
 
 const expenses = ref([]);
 const loading = ref(true);
@@ -172,8 +185,16 @@ const deletingExpenseId = ref(null);
 const fetchExpenses = async () => {
   loading.value = true;
   try {
-    const response = await apiClient.get('/api/expenses', { params: { search: searchParams.searchTerm, page: searchParams.page, pageSize: searchParams.pageSize } });
+    // ✅ 请求时带上所有的分页和搜索参数
+    const response = await apiClient.get('/api/expenses', { 
+      params: { 
+        search: searchParams.searchTerm, 
+        page: searchParams.page, 
+        pageSize: searchParams.pageSize 
+      } 
+    });
     if (response.data.code === 0) {
+      // ✅ 后端返回的数据结构应该是 { list: [...], total: ... }
       expenses.value = response.data.data.list || [];
       searchParams.total = response.data.data.total || 0;
     }
@@ -183,6 +204,7 @@ const fetchExpenses = async () => {
     loading.value = false;
   }
 };
+
 const handleSave = async () => {
   if (!currentExpense.value.elderName?.trim()) return;
   if (!currentExpense.value.item?.trim()) return;
@@ -231,6 +253,26 @@ const formatDate = (dateString) => dateString ? new Date(dateString).toISOString
 const formatDateTime = (dateString) => dateString ? new Date(dateString).toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-') : '';
 const resetSearch = () => { searchParams.searchTerm = ''; fetchExpenses(); };
 const getStatusClass = (status) => ({ '已支付': 'success', '未支付': 'warning', '已退款': 'danger', '处理中': 'info' }[status] || 'default');
+
+
+// ✅✅✅ 处理分页器事件的方法 ✅✅✅
+
+/**
+ * 当每页显示条数改变时触发 (e.g., from 10 to 20)
+ */
+const handleSizeChange = (newPageSize) => {
+  searchParams.pageSize = newPageSize;
+  searchParams.page = 1; // 改变每页条数时，通常回到第一页
+  fetchExpenses();
+};
+
+/**
+ * 当页码改变时触发 (e.g., from page 1 to 2)
+ */
+const handleCurrentChange = (newPage) => {
+  searchParams.page = newPage;
+  fetchExpenses();
+};
 
 onMounted(fetchExpenses);
 watch(() => searchParams.searchTerm, () => { searchParams.page = 1; fetchExpenses(); });
@@ -640,6 +682,12 @@ watch(() => searchParams.page, fetchExpenses);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 15px;
+}
+
+.pagination-container {
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
 }
 
 /* --- 动画 --- */
